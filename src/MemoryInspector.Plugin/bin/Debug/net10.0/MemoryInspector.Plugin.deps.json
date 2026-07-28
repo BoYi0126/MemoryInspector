@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "MemoryInspector.Plugin/1.0.0": {
+        "dependencies": {
+          "MemoryInspector.Common": "1.0.0"
+        },
+        "runtime": {
+          "MemoryInspector.Plugin.dll": {}
+        }
+      },
+      "MemoryInspector.Common/1.0.0": {
+        "runtime": {
+          "MemoryInspector.Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MemoryInspector.Plugin/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MemoryInspector.Common/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

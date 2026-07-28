@@ -1,3 +1,15 @@
 <Solution>
-  <Project Path="MemoryInspector/MemoryInspector.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/MemoryInspector.Application/MemoryInspector.Application.csproj" />
+    <Project Path="src/MemoryInspector.Common/MemoryInspector.Common.csproj" />
+    <Project Path="src/MemoryInspector.Core/MemoryInspector.Core.csproj" />
+    <Project Path="src/MemoryInspector.Plugin/MemoryInspector.Plugin.csproj" />
+    <Project Path="src/MemoryInspector.Windows/MemoryInspector.Windows.csproj" />
+    <Project Path="src/MemoryInspector.Wpf/MemoryInspector.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MemoryInspector.Core.Tests/MemoryInspector.Core.Tests.csproj" />
+    <Project Path="tests/MemoryInspector.IntegrationTests/MemoryInspector.IntegrationTests.csproj" />
+    <Project Path="tests/MemoryInspector.Windows.Tests/MemoryInspector.Windows.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MemoryInspector.Application</RootNamespace>
+    <AssemblyName>MemoryInspector.Application</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MemoryInspector.Common\MemoryInspector.Common.csproj" />
+    <ProjectReference Include="..\MemoryInspector.Core\MemoryInspector.Core.csproj" />
+  </ItemGroup>
+</Project>

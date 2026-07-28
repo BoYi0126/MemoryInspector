@@ -1,0 +1,16 @@
+<Project Sdk="MSTest.Sdk/4.3.2">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <TestingExtensionsProfile>None</TestingExtensionsProfile>
+    <RootNamespace>MemoryInspector.IntegrationTests</RootNamespace>
+    <AssemblyName>MemoryInspector.IntegrationTests</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MemoryInspector.Application\MemoryInspector.Application.csproj" />
+    <ProjectReference Include="..\..\src\MemoryInspector.Plugin\MemoryInspector.Plugin.csproj" />
+    <ProjectReference Include="..\..\src\MemoryInspector.Windows\MemoryInspector.Windows.csproj" />
+    <ProjectReference Include="..\..\src\MemoryInspector.Wpf\MemoryInspector.Wpf.csproj" />
+  </ItemGroup>
+</Project>

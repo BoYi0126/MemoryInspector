@@ -1,0 +1,16 @@
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\bin\Debug\net10.0\MemoryInspector.Core.deps.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\bin\Debug\net10.0\MemoryInspector.Core.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\bin\Debug\net10.0\MemoryInspector.Core.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\bin\Debug\net10.0\MemoryInspector.Common.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\bin\Debug\net10.0\MemoryInspector.Common.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.csproj.AssemblyReference.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.AssemblyInfoInputs.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.AssemblyInfo.cs
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.csproj.CoreCompileInputs.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.sourcelink.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryIn.93EA68F4.Up2Date
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\refint\MemoryInspector.Core.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\MemoryInspector.Core.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Core\obj\Debug\net10.0\ref\MemoryInspector.Core.dll
