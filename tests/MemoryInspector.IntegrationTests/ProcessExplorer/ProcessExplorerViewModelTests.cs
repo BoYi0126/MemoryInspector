@@ -1,4 +1,5 @@
 using MemoryInspector.Application.Configuration;
+using MemoryInspector.Application.Processes;
 using MemoryInspector.Common;
 using MemoryInspector.Core.Processes;
 using MemoryInspector.Wpf.ViewModels;
@@ -9,7 +10,25 @@ namespace MemoryInspector.IntegrationTests.ProcessExplorer;
 public sealed class ProcessExplorerViewModelTests
 {
     [TestMethod]
-    public async Task InitializeLoadsAndFormatsProcessesWithoutBlockingFilters()
+    public async Task InitializeDoesNotScanProcesses()
+    {
+        var service = new QueueProcessService(
+            [ProcessSummaryFactory.Create(30, "Zulu")]);
+        using var viewModel = new ProcessExplorerViewModel(
+            service,
+            new TestLogger());
+
+        await viewModel.InitializeAsync(AppSettings.CreateDefault());
+
+        Assert.AreEqual(0, service.CallCount);
+        Assert.AreEqual(0, viewModel.Processes.Count);
+        Assert.AreEqual("Not scanned yet", viewModel.ProcessCountDisplay);
+        Assert.IsNull(viewModel.LastRefreshedAt);
+        StringAssert.Contains(viewModel.StatusMessage, "Scan Processes");
+    }
+
+    [TestMethod]
+    public async Task ManualScanLoadsAndFormatsProcessesWithoutBlockingFilters()
     {
         var service = new QueueProcessService(
             [
@@ -22,6 +41,7 @@ public sealed class ProcessExplorerViewModelTests
             new TestLogger());
 
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
 
         CollectionAssert.AreEqual(
             new[] { "Alpha", "Beta", "Zulu" },
@@ -44,6 +64,7 @@ public sealed class ProcessExplorerViewModelTests
             service,
             new TestLogger());
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
 
         viewModel.SearchText = "amm";
         Assert.AreEqual("Gamma", viewModel.Processes.Single().ProcessName);
@@ -70,6 +91,7 @@ public sealed class ProcessExplorerViewModelTests
             service,
             new TestLogger());
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
 
         viewModel.SelectedSortOption = ProcessSortOption.WorkingSet;
         viewModel.SortDescending = true;
@@ -110,6 +132,7 @@ public sealed class ProcessExplorerViewModelTests
             service,
             new TestLogger());
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
         viewModel.SelectedProcess = viewModel.Processes.Single();
 
         await viewModel.RefreshAsync();
@@ -138,6 +161,7 @@ public sealed class ProcessExplorerViewModelTests
             service,
             new TestLogger());
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
         viewModel.SelectedProcess = viewModel.Processes.Single();
         ProcessMonitoringRequestedEventArgs? requested = null;
         viewModel.StartMonitoringRequested += (_, eventArgs) =>
@@ -164,6 +188,7 @@ public sealed class ProcessExplorerViewModelTests
             new TestLogger(),
             monitoringService);
         await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        await viewModel.RefreshAsync();
         viewModel.SelectedProcess = viewModel.Processes.Single();
 
         await viewModel.StartMonitoringCommand.ExecuteAsync();
@@ -209,6 +234,10 @@ public sealed class ProcessExplorerViewModelTests
 
         Assert.IsFalse(refresh.IsCompleted);
         Assert.IsTrue(viewModel.IsBusy);
+        Assert.IsTrue(viewModel.IsScanProgressIndeterminate);
+        StringAssert.Contains(
+            viewModel.ScanProgressDisplay,
+            "Discovering running processes");
 
         completion.SetResult(
             Result<IReadOnlyList<ProcessSummary>>.Success(
@@ -220,6 +249,41 @@ public sealed class ProcessExplorerViewModelTests
     }
 
     [TestMethod]
+    public async Task ScanReportsKnownProcessCountAndPercentage()
+    {
+        var progressReported = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var service = new ProgressProcessService(
+            async (cancellationToken, progress) =>
+            {
+                progress?.Report(new ProcessScanProgress(0, null));
+                progress?.Report(new ProcessScanProgress(2, 4));
+                progressReported.TrySetResult();
+                await release.Task.WaitAsync(cancellationToken);
+                return Result<IReadOnlyList<ProcessSummary>>.Success(
+                    [ProcessSummaryFactory.Create(9, "Completed")]);
+            });
+        using var viewModel = new ProcessExplorerViewModel(
+            service,
+            new TestLogger());
+
+        var scan = viewModel.RefreshAsync();
+        await progressReported.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+        Assert.IsTrue(viewModel.IsBusy);
+        Assert.IsFalse(viewModel.IsScanProgressIndeterminate);
+        Assert.AreEqual(2, viewModel.ScannedProcessCount);
+        Assert.AreEqual(4, viewModel.TotalProcessCount);
+        Assert.AreEqual(50d, viewModel.ScanProgressPercentage);
+        StringAssert.Contains(viewModel.ScanProgressDisplay, "2 of 4");
+
+        release.TrySetResult();
+        await scan;
+    }
+
+    [TestMethod]
     public async Task AutoRefreshUsesTheConfiguredInterval()
     {
         var secondCall = new TaskCompletionSource(
@@ -228,7 +292,7 @@ public sealed class ProcessExplorerViewModelTests
         var service = new DelegateProcessService(
             _ =>
             {
-                if (Interlocked.Increment(ref callCount) >= 2)
+                if (Interlocked.Increment(ref callCount) >= 1)
                 {
                     secondCall.TrySetResult();
                 }
@@ -251,6 +315,6 @@ public sealed class ProcessExplorerViewModelTests
         await secondCall.Task.WaitAsync(TimeSpan.FromSeconds(2));
         viewModel.IsAutoRefreshEnabled = false;
 
-        Assert.IsTrue(service.CallCount >= 2);
+        Assert.IsTrue(service.CallCount >= 1);
     }
 }

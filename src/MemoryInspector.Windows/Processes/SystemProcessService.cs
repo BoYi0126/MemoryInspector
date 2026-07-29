@@ -38,7 +38,8 @@ public sealed class SystemProcessService : ISystemProcessService, IDisposable
     }
 
     public async Task<Result<IReadOnlyList<ProcessSummary>>> GetProcessesAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<ProcessScanProgress>? progress = null)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -59,6 +60,7 @@ public sealed class SystemProcessService : ISystemProcessService, IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
             processes = _processSource.GetProcesses();
+            progress?.Report(new ProcessScanProgress(0, processes.Count));
 
             var sampleTime = _timeProvider.GetUtcNow();
             var nextCpuSamples = new Dictionary<ProcessIdentity, CpuSample>();
@@ -78,6 +80,10 @@ public sealed class SystemProcessService : ISystemProcessService, IDisposable
                 {
                     nextProcessIndex++;
                     process.Dispose();
+                    progress?.Report(
+                        new ProcessScanProgress(
+                            nextProcessIndex,
+                            processes.Count));
                 }
             }
 

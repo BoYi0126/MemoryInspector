@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using MemoryInspector.Application.Logging;
+using MemoryInspector.Application.Processes;
 using MemoryInspector.Common;
 using MemoryInspector.Core.Processes;
 using MemoryInspector.Windows.Processes;
@@ -21,6 +22,33 @@ public sealed class SystemProcessServiceTests
 
         Assert.IsTrue(result.IsSuccess);
         Assert.AreEqual(0, result.Value.Count);
+    }
+
+    [TestMethod]
+    public async Task EnumerationReportsKnownTotalAndCompletedCount()
+    {
+        var source = new FakeProcessSource(
+            () =>
+            [
+                new FakeProcessAccessor { ProcessId = 1 },
+                new FakeProcessAccessor { ProcessId = 2 },
+            ]);
+        var reports = new List<ProcessScanProgress>();
+        var progress = new SynchronousProgress<ProcessScanProgress>(
+            reports.Add);
+        using var service = CreateService(source);
+
+        var result = await service.GetProcessesAsync(progress: progress);
+
+        Assert.IsTrue(result.IsSuccess);
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                new ProcessScanProgress(0, 2),
+                new ProcessScanProgress(1, 2),
+                new ProcessScanProgress(2, 2),
+            },
+            reports);
     }
 
     [TestMethod]
@@ -209,5 +237,14 @@ public sealed class SystemProcessServiceTests
             new ManualTimeProvider(
                 new DateTimeOffset(2026, 1, 1, 1, 0, 0, TimeSpan.Zero)),
             processorCount: 4);
+    }
+
+    private sealed class SynchronousProgress<T>(Action<T> report)
+        : IProgress<T>
+    {
+        public void Report(T value)
+        {
+            report(value);
+        }
     }
 }

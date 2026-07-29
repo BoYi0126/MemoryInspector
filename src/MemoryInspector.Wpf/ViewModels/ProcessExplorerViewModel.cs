@@ -32,7 +32,10 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
     private bool _sortDescending;
     private bool _isAutoRefreshEnabled;
     private bool _isBusy;
-    private string _statusMessage = "Ready to scan running processes.";
+    private int _scannedProcessCount;
+    private int? _totalProcessCount;
+    private string _statusMessage =
+        "Press Scan Processes to load the running process list.";
     private DateTimeOffset? _lastRefreshedAt;
     private MonitoringSession? _currentSession;
     private TimeSpan _autoRefreshInterval = TimeSpan.FromSeconds(2);
@@ -207,9 +210,64 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _isBusy, value))
             {
                 RefreshCommand.NotifyCanExecuteChanged();
+                OnPropertyChanged(nameof(IsScanProgressIndeterminate));
+                OnPropertyChanged(nameof(ScanProgressDisplay));
             }
         }
     }
+
+    public int ScannedProcessCount
+    {
+        get => _scannedProcessCount;
+        private set
+        {
+            if (SetProperty(ref _scannedProcessCount, value))
+            {
+                OnPropertyChanged(nameof(ScanProgressPercentage));
+                OnPropertyChanged(nameof(ScanProgressDisplay));
+            }
+        }
+    }
+
+    public int? TotalProcessCount
+    {
+        get => _totalProcessCount;
+        private set
+        {
+            if (SetProperty(ref _totalProcessCount, value))
+            {
+                OnPropertyChanged(nameof(ScanProgressPercentage));
+                OnPropertyChanged(nameof(IsScanProgressIndeterminate));
+                OnPropertyChanged(nameof(ScanProgressDisplay));
+            }
+        }
+    }
+
+    public double ScanProgressPercentage => TotalProcessCount switch
+    {
+        > 0 => Math.Clamp(
+            ScannedProcessCount * 100d / TotalProcessCount.Value,
+            0d,
+            100d),
+        0 => 100d,
+        _ => 0d,
+    };
+
+    public bool IsScanProgressIndeterminate =>
+        IsBusy && !TotalProcessCount.HasValue;
+
+    public string ScanProgressDisplay => TotalProcessCount switch
+    {
+        > 0 =>
+            $"Scanning {ScannedProcessCount:N0} of " +
+            $"{TotalProcessCount.Value:N0} processes " +
+            $"({ScanProgressPercentage:0}%)",
+        0 => "No running processes were found.",
+        _ when ScannedProcessCount > 0 =>
+            $"Discovering running processes… " +
+            $"{ScannedProcessCount:N0} scanned",
+        _ => "Discovering running processes…",
+    };
 
     public string StatusMessage
     {
@@ -225,6 +283,7 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
             if (SetProperty(ref _lastRefreshedAt, value))
             {
                 OnPropertyChanged(nameof(LastRefreshedDisplay));
+                OnPropertyChanged(nameof(ProcessCountDisplay));
             }
         }
     }
@@ -233,8 +292,9 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
         ? $"Last updated {LastRefreshedAt.Value.ToLocalTime():HH:mm:ss}"
         : "Not refreshed yet";
 
-    public string ProcessCountDisplay =>
-        $"{Processes.Count:N0} of {_allProcesses.Count:N0} processes";
+    public string ProcessCountDisplay => LastRefreshedAt.HasValue
+        ? $"{Processes.Count:N0} of {_allProcesses.Count:N0} processes"
+        : "Not scanned yet";
 
     public MonitoringSession? CurrentSession
     {
@@ -275,14 +335,17 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
 
     public AsyncRelayCommand StopMonitoringCommand { get; }
 
-    public async Task InitializeAsync(
+    public Task InitializeAsync(
         AppSettings settings,
         CancellationToken cancellationToken = default)
     {
         Guard.NotNull(settings);
+        cancellationToken.ThrowIfCancellationRequested();
         _autoRefreshInterval = TimeSpan.FromMilliseconds(
             settings.ProcessRefreshIntervalMilliseconds);
-        await RefreshAsync(cancellationToken);
+        StatusMessage =
+            "Press Scan Processes to load the running process list.";
+        return Task.CompletedTask;
     }
 
     public async Task RefreshAsync(
@@ -301,14 +364,19 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
             currentCancellation = _refreshCancellation;
         }
 
+        ScannedProcessCount = 0;
+        TotalProcessCount = null;
         IsBusy = true;
         StatusMessage = "Scanning running processes…";
+        var progress = new ProcessProgressReporter(
+            value => ReportScanProgress(currentCancellation, value));
 
         try
         {
             var result = await Task.Run(
                 () => _processService.GetProcessesAsync(
-                    currentCancellation.Token),
+                    currentCancellation.Token,
+                    progress),
                 currentCancellation.Token);
 
             if (currentCancellation.IsCancellationRequested ||
@@ -654,12 +722,60 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
         }
     }
 
+    private void ReportScanProgress(
+        CancellationTokenSource cancellation,
+        ProcessScanProgress progress)
+    {
+        if (cancellation.IsCancellationRequested ||
+            !IsCurrentRefresh(cancellation))
+        {
+            return;
+        }
+
+        if (_synchronizationContext is not null &&
+            SynchronizationContext.Current != _synchronizationContext)
+        {
+            _synchronizationContext.Post(
+                _ => ApplyScanProgress(cancellation, progress),
+                null);
+            return;
+        }
+
+        ApplyScanProgress(cancellation, progress);
+    }
+
+    private void ApplyScanProgress(
+        CancellationTokenSource cancellation,
+        ProcessScanProgress progress)
+    {
+        if (cancellation.IsCancellationRequested ||
+            !IsCurrentRefresh(cancellation))
+        {
+            return;
+        }
+
+        TotalProcessCount = progress.TotalCount is >= 0
+            ? progress.TotalCount
+            : null;
+        ScannedProcessCount = Math.Max(0, progress.ScannedCount);
+    }
+
     private bool IsCurrentRefresh(
         CancellationTokenSource cancellation)
     {
         lock (_refreshSync)
         {
             return ReferenceEquals(_refreshCancellation, cancellation);
+        }
+    }
+
+    private sealed class ProcessProgressReporter(
+        Action<ProcessScanProgress> report)
+        : IProgress<ProcessScanProgress>
+    {
+        public void Report(ProcessScanProgress value)
+        {
+            report(value);
         }
     }
 }

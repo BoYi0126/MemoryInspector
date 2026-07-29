@@ -21,10 +21,26 @@ internal sealed class DelegateProcessService(
     private int _callCount;
 
     public Task<Result<IReadOnlyList<ProcessSummary>>> GetProcessesAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<ProcessScanProgress>? progress = null)
     {
         Interlocked.Increment(ref _callCount);
         return _getProcesses(cancellationToken);
+    }
+}
+
+internal sealed class ProgressProcessService(
+    Func<
+        CancellationToken,
+        IProgress<ProcessScanProgress>?,
+        Task<Result<IReadOnlyList<ProcessSummary>>>> getProcesses)
+    : ISystemProcessService
+{
+    public Task<Result<IReadOnlyList<ProcessSummary>>> GetProcessesAsync(
+        CancellationToken cancellationToken = default,
+        IProgress<ProcessScanProgress>? progress = null)
+    {
+        return getProcesses(cancellationToken, progress);
     }
 }
 
@@ -34,10 +50,15 @@ internal sealed class QueueProcessService(
     private readonly Queue<IReadOnlyList<ProcessSummary>> _responses =
         new(responses);
     private readonly object _sync = new();
+    private int _callCount;
+
+    public int CallCount => Volatile.Read(ref _callCount);
 
     public Task<Result<IReadOnlyList<ProcessSummary>>> GetProcessesAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<ProcessScanProgress>? progress = null)
     {
+        Interlocked.Increment(ref _callCount);
         cancellationToken.ThrowIfCancellationRequested();
 
         lock (_sync)

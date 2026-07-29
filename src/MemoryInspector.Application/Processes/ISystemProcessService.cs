@@ -6,5 +6,6 @@ namespace MemoryInspector.Application.Processes;
 public interface ISystemProcessService
 {
     Task<Result<IReadOnlyList<ProcessSummary>>> GetProcessesAsync(
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        IProgress<ProcessScanProgress>? progress = null);
 }

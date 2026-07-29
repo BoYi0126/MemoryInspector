@@ -34,12 +34,17 @@ On first launch the application creates `%LOCALAPPDATA%\MemoryInspector` and def
 
 The application is read-only by default. Memory Editor is disabled until both risk and authorized-target acknowledgements are accepted.
 
+The application does not scan running processes automatically at startup. The process list remains empty until you explicitly start a scan.
+
 ## Inspecting a process
 
-1. Open **Processes** and refresh the list.
-2. Search by name or filter by PID.
-3. Select a process and review its PID, architecture, access status, memory, CPU, and start time.
-4. Select **Start Monitoring**.
+1. Open **Processes** and select **Scan Processes**.
+2. While the operating-system process snapshot is being discovered, an indeterminate loading indicator is shown. Once the total is known, it changes to a scanned/total count and percentage.
+3. Search by name or filter by PID.
+4. Select a process and review its PID, architecture, access status, memory, CPU, and start time.
+5. Select **Start Monitoring**.
+
+**Auto refresh** is opt-in. Enabling it performs later scans at the configured interval; it is disabled when the application starts.
 
 Monitoring binds subsequent operations to the selected process identity. If the target exits or the PID is reused, the session becomes invalid and dependent views stop or clear.
 
@@ -117,4 +122,3 @@ To uninstall:
 1. Close MemoryInspector.
 2. Delete the extracted application folder.
 3. Optionally delete `%LOCALAPPDATA%\MemoryInspector` to remove settings, snapshots, saved addresses, logs, plugins, and audit records.
-
