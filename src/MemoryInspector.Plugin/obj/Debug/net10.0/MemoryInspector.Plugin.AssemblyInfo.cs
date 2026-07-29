@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MemoryInspector.Plugin")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75a0cc2a78aeff6d984fc5828af2e84a1880acf8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea2dfdb7112163bece4816e35159508b307211a8")]
 [assembly: System.Reflection.AssemblyProductAttribute("MemoryInspector.Plugin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MemoryInspector.Plugin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
