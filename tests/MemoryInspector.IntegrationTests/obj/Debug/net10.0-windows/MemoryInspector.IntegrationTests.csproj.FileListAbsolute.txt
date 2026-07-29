@@ -140,3 +140,9 @@ C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspecto
 C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\obj\Debug\net10.0-windows\MemoryInspector.IntegrationTests.genautoregisteredextensionsinputcache.cache
 C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\obj\Debug\net10.0-windows\SelfRegisteredExtensions.cs
 C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\obj\Debug\net10.0-windows\MemoryInspector.IntegrationTests.genruntimeconfig.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\MemoryInspector.TestTarget.deps.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\MemoryInspector.TestTarget.runtimeconfig.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\MemoryInspector.TestTarget.exe
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\plugin.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\MemoryInspector.SamplePlugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\tests\MemoryInspector.IntegrationTests\bin\Debug\net10.0-windows\MemoryInspector.SamplePlugin.pdb

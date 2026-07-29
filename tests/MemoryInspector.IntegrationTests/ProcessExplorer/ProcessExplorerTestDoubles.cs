@@ -1,6 +1,8 @@
 using MemoryInspector.Application.Logging;
+using MemoryInspector.Application.Monitoring;
 using MemoryInspector.Application.Processes;
 using MemoryInspector.Common;
+using MemoryInspector.Core.Monitoring;
 using MemoryInspector.Core.Processes;
 
 namespace MemoryInspector.IntegrationTests.ProcessExplorer;
@@ -67,6 +69,68 @@ internal sealed class TestLogger : IAppLogger
         }
 
         return Result.Success();
+    }
+}
+
+internal sealed class RecordingMonitoringSessionService
+    : IMonitoringSessionService
+{
+    public MonitoringSession? CurrentSession { get; private set; }
+
+    public MonitoringSessionIdentity? StartedIdentity { get; private set; }
+
+    public int StopCount { get; private set; }
+
+    public event EventHandler<MonitoringSessionChangedEventArgs>?
+        SessionChanged;
+
+    public Task<Result<MonitoringSession>> StartAsync(
+        MonitoringSessionIdentity identity,
+        CancellationToken cancellationToken = default)
+    {
+        StartedIdentity = identity;
+        CurrentSession = new MonitoringSession
+        {
+            SessionId = Guid.NewGuid(),
+            Identity = identity,
+            State = MonitoringSessionState.Connected,
+            CreatedAt = DateTimeOffset.UtcNow,
+            ConnectedAt = DateTimeOffset.UtcNow,
+            StatusMessage = "Monitoring target.",
+        };
+        SessionChanged?.Invoke(
+            this,
+            new MonitoringSessionChangedEventArgs(CurrentSession));
+        return Task.FromResult(
+            Result<MonitoringSession>.Success(CurrentSession));
+    }
+
+    public Task<Result<MonitoringSession>> CheckLivenessAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(
+            Result<MonitoringSession>.Success(CurrentSession!));
+    }
+
+    public Task<Result> StopAsync(
+        CancellationToken cancellationToken = default)
+    {
+        StopCount++;
+        CurrentSession = CurrentSession! with
+        {
+            State = MonitoringSessionState.Disconnected,
+            EndedAt = DateTimeOffset.UtcNow,
+            StatusMessage = "Monitoring session stopped.",
+        };
+        SessionChanged?.Invoke(
+            this,
+            new MonitoringSessionChangedEventArgs(CurrentSession));
+        return Task.FromResult(Result.Success());
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
     }
 }
 

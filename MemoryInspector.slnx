@@ -7,9 +7,13 @@
     <Project Path="src/MemoryInspector.Windows/MemoryInspector.Windows.csproj" />
     <Project Path="src/MemoryInspector.Wpf/MemoryInspector.Wpf.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/MemoryInspector.SamplePlugin/MemoryInspector.SamplePlugin.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MemoryInspector.Core.Tests/MemoryInspector.Core.Tests.csproj" />
     <Project Path="tests/MemoryInspector.IntegrationTests/MemoryInspector.IntegrationTests.csproj" />
+    <Project Path="tests/MemoryInspector.TestTarget/MemoryInspector.TestTarget.csproj" />
     <Project Path="tests/MemoryInspector.Windows.Tests/MemoryInspector.Windows.Tests.csproj" />
   </Folder>
 </Solution>

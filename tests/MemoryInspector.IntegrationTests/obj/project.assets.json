@@ -502,7 +502,26 @@
         },
         "runtime": {
           "bin/placeholder/MemoryInspector.Plugin.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
+      "MemoryInspector.SamplePlugin/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "MemoryInspector.Plugin": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MemoryInspector.SamplePlugin.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MemoryInspector.SamplePlugin.dll": {}
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "MemoryInspector.Windows/1.0.0": {
         "type": "project",
@@ -1228,6 +1247,11 @@
       "path": "../../src/MemoryInspector.Plugin/MemoryInspector.Plugin.csproj",
       "msbuildProject": "../../src/MemoryInspector.Plugin/MemoryInspector.Plugin.csproj"
     },
+    "MemoryInspector.SamplePlugin/1.0.0": {
+      "type": "project",
+      "path": "../../samples/MemoryInspector.SamplePlugin/MemoryInspector.SamplePlugin.csproj",
+      "msbuildProject": "../../samples/MemoryInspector.SamplePlugin/MemoryInspector.SamplePlugin.csproj"
+    },
     "MemoryInspector.Windows/1.0.0": {
       "type": "project",
       "path": "../../src/MemoryInspector.Windows/MemoryInspector.Windows.csproj",
@@ -1245,6 +1269,7 @@
       "MSTest.TestFramework >= 4.3.2",
       "MemoryInspector.Application >= 1.0.0",
       "MemoryInspector.Plugin >= 1.0.0",
+      "MemoryInspector.SamplePlugin >= 1.0.0",
       "MemoryInspector.Windows >= 1.0.0",
       "MemoryInspector.Wpf >= 1.0.0"
     ]
@@ -1277,6 +1302,9 @@
           "framework": "net10.0-windows7.0",
           "targetAlias": "net10.0-windows",
           "projectReferences": {
+            "C:\\Users\\吳柏逸(BobWu)TWTAI\\source\\repos\\MemoryInspector\\samples\\MemoryInspector.SamplePlugin\\MemoryInspector.SamplePlugin.csproj": {
+              "projectPath": "C:\\Users\\吳柏逸(BobWu)TWTAI\\source\\repos\\MemoryInspector\\samples\\MemoryInspector.SamplePlugin\\MemoryInspector.SamplePlugin.csproj"
+            },
             "C:\\Users\\吳柏逸(BobWu)TWTAI\\source\\repos\\MemoryInspector\\src\\MemoryInspector.Application\\MemoryInspector.Application.csproj": {
               "projectPath": "C:\\Users\\吳柏逸(BobWu)TWTAI\\source\\repos\\MemoryInspector\\src\\MemoryInspector.Application\\MemoryInspector.Application.csproj"
             },

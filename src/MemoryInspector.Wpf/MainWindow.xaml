@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MemoryInspector · Process Explorer"
+        Title="MemoryInspector"
         Width="1280"
         Height="760"
         MinWidth="1000"
@@ -20,6 +20,9 @@
         <SolidColorBrush x:Key="MutedTextBrush" Color="#91A1B7" />
         <SolidColorBrush x:Key="AccentBrush" Color="#58C4DC" />
         <SolidColorBrush x:Key="AccentDarkBrush" Color="#153E4B" />
+        <SolidColorBrush x:Key="SelectedTabBackgroundBrush" Color="#65D9EF" />
+        <SolidColorBrush x:Key="SelectedTabForegroundBrush" Color="#07131A" />
+        <SolidColorBrush x:Key="TabHoverBackgroundBrush" Color="#20364C" />
 
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -117,6 +120,10 @@
                     <Setter Property="Opacity" Value="0.62" />
                     <Setter Property="Background" Value="#2B2027" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding IsUnreadable}" Value="True">
+                    <Setter Property="Background" Value="#321D27" />
+                    <Setter Property="Foreground" Value="#F3B3B9" />
+                </DataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -139,9 +146,72 @@
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="Margin" Value="0,0,0,14" />
         </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}" />
+            <Setter Property="Background" Value="#101824" />
+            <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="20,9" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabHeader"
+                                MinHeight="38"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5,5,0,0"
+                                SnapsToDevicePixels="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                    <Setter Property="Background" Value="{StaticResource TabHoverBackgroundBrush}" />
+                    <Setter Property="BorderBrush" Value="#4A6D8F" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource SelectedTabForegroundBrush}" />
+                    <Setter Property="Background" Value="{StaticResource SelectedTabBackgroundBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Panel.ZIndex" Value="1" />
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="White" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="24">
+    <TabControl Margin="24"
+                SelectedIndex="{Binding SelectedWorkspaceIndex,
+                                        Mode=TwoWay}">
+        <TabItem Header="Processes">
+    <Grid Margin="0,16,0,0"
+          DataContext="{Binding ProcessExplorer}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -315,6 +385,31 @@
                                    Foreground="{StaticResource MutedTextBrush}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,18" />
+
+                        <Border Padding="12"
+                                Margin="0,0,0,18"
+                                Background="#0D1623"
+                                BorderBrush="{StaticResource PanelBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="MONITORING SESSION"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="{Binding SessionStateDisplay}"
+                                           FontSize="17"
+                                           FontWeight="SemiBold"
+                                           Margin="0,5,0,2" />
+                                <TextBlock Text="{Binding SessionIdentityDisplay}"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding SessionStatusMessage}"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <ScrollViewer Grid.Row="1"
@@ -352,12 +447,23 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <Button Grid.Row="2"
-                            Content="Start Monitoring"
-                            Command="{Binding StartMonitoringCommand}"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            HorizontalAlignment="Stretch"
-                            Margin="0,16,0,0" />
+                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Start Monitoring"
+                                Command="{Binding StartMonitoringCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="2"
+                                Content="Stop"
+                                Command="{Binding StopMonitoringCommand}"
+                                MinWidth="78" />
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
@@ -386,4 +492,2419 @@
                        VerticalAlignment="Center" />
         </Grid>
     </Grid>
+        </TabItem>
+
+        <TabItem Header="Memory Regions">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding MemoryRegions}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="MEMORY REGION VIEWER"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontSize="12"
+                                   FontWeight="Bold" />
+                        <TextBlock Text="{Binding TargetDisplay}"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5,0,0" />
+                        <TextBlock Text="Inspect the target virtual address map and access protections."
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="13"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding RegionCountDisplay}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding LastRefreshedDisplay}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   Margin="0,4,0,0"
+                                   HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,0,0,14"
+                        Padding="14"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="145" />
+                            <ColumnDefinition Width="115" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="115" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="ADDRESS (HEX)"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding AddressSearchText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Find the region containing this x64 address" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="PROTECTION"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding ProtectionFilters}"
+                                      SelectedItem="{Binding SelectedProtectionFilter}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                            <TextBlock Text="TYPE"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding TypeFilters}"
+                                      SelectedItem="{Binding SelectedTypeFilter}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Margin="0,0,10,0">
+                            <TextBlock Text="ACCESS"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding AccessFilters}"
+                                      SelectedItem="{Binding SelectedAccessFilter}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="4" Margin="0,0,12,0">
+                            <TextBlock Text="SORT BY"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding SortOptions}"
+                                      SelectedItem="{Binding SelectedSortOption}" />
+                        </StackPanel>
+
+                        <CheckBox Grid.Column="5"
+                                  Content="Descending"
+                                  IsChecked="{Binding SortDescending}"
+                                  Margin="0,20,18,0" />
+
+                        <Button Grid.Column="6"
+                                Content="Open Hex"
+                                Command="{Binding OpenHexCommand}"
+                                Margin="0,18,8,0"
+                                MinWidth="90" />
+
+                        <Button Grid.Column="7"
+                                Content="Refresh"
+                                Command="{Binding RefreshCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,18,0,0"
+                                MinWidth="90" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3.2*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="1.1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid Grid.Column="0"
+                              ItemsSource="{Binding Regions}"
+                              SelectedItem="{Binding SelectedRegion,
+                                                     Mode=TwoWay,
+                                                     UpdateSourceTrigger=PropertyChanged}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Base address"
+                                                Binding="{Binding BaseAddressDisplay}"
+                                                Width="145" />
+                            <DataGridTextColumn Header="End address"
+                                                Binding="{Binding EndAddressDisplay}"
+                                                Width="145" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeDisplay}"
+                                                Width="95" />
+                            <DataGridTextColumn Header="State"
+                                                Binding="{Binding State}"
+                                                Width="90" />
+                            <DataGridTextColumn Header="Type"
+                                                Binding="{Binding Type}"
+                                                Width="85" />
+                            <DataGridTextColumn Header="Protection"
+                                                Binding="{Binding ProtectionDisplay}"
+                                                Width="*" />
+                            <DataGridTextColumn Header="Access"
+                                                Binding="{Binding AccessDisplay}"
+                                                Width="75" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Column="2"
+                            Padding="20"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="REGION DETAILS"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="11"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="{Binding SelectedRegion.BaseAddressDisplay,
+                                                        TargetNullValue=No region selected}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Margin="0,8,0,4" />
+                                <TextBlock Text="{Binding SelectedRegion.AccessDisplay,
+                                                        TargetNullValue=Select a region to inspect its boundaries and protection.}"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,18" />
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="END ADDRESS (EXCLUSIVE)"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Text="{Binding SelectedRegion.EndAddressDisplay,
+                                                            TargetNullValue=—}"
+                                               Style="{StaticResource DetailValueStyle}" />
+
+                                    <TextBlock Text="ALLOCATION BASE"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Text="{Binding SelectedRegion.AllocationBaseDisplay,
+                                                            TargetNullValue=—}"
+                                               Style="{StaticResource DetailValueStyle}" />
+
+                                    <TextBlock Text="SIZE"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Text="{Binding SelectedRegion.SizeDisplay,
+                                                            TargetNullValue=—}"
+                                               Style="{StaticResource DetailValueStyle}" />
+
+                                    <TextBlock Text="STATE / TYPE"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Style="{StaticResource DetailValueStyle}">
+                                        <Run Text="{Binding SelectedRegion.State,
+                                                            Mode=OneWay,
+                                                            TargetNullValue=—}" />
+                                        <Run Text=" / " />
+                                        <Run Text="{Binding SelectedRegion.Type,
+                                                            Mode=OneWay,
+                                                            TargetNullValue=—}" />
+                                    </TextBlock>
+
+                                    <TextBlock Text="PROTECTION"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Text="{Binding SelectedRegion.ProtectionDisplay,
+                                                            TargetNullValue=—}"
+                                               Style="{StaticResource DetailValueStyle}" />
+
+                                    <TextBlock Text="ACCESS FLAGS"
+                                               Style="{StaticResource DetailLabelStyle}" />
+                                    <TextBlock Text="{Binding SelectedRegion.AccessDisplay,
+                                                            TargetNullValue=—}"
+                                               Style="{StaticResource DetailValueStyle}" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="3" Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <ProgressBar Width="90"
+                                     Height="4"
+                                     Margin="0,0,12,0"
+                                     IsIndeterminate="True"
+                                     Visibility="{Binding IsBusy,
+                                                          Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal">
+                        <TextBlock Text="{Binding WarningMessage}"
+                                   Foreground="#F0A66B"
+                                   Margin="0,0,16,0"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="460" />
+                        <TextBlock Text="{Binding FilterMessage}"
+                                   Foreground="#F0A66B"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Results">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding Results}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="RESULT GRID"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontSize="12"
+                                   FontWeight="Bold" />
+                        <TextBlock Text="{Binding SnapshotDisplay}"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5,0,0" />
+                        <TextBlock Text="Paged candidate results with lazy loading and bounded memory."
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="13"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CandidateCountDisplay}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding PageDisplay}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   Margin="0,4,0,0"
+                                   HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,0,0,14"
+                        Padding="14"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Load active results"
+                                Command="{Binding LoadActiveResultsCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,8,0" />
+                        <Button Grid.Column="1"
+                                Content="Reload page"
+                                Command="{Binding ReloadCommand}" />
+
+                        <StackPanel Grid.Column="3">
+                            <TextBlock Text="SORT CURRENT PAGE"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding SortOptions}"
+                                      SelectedItem="{Binding SelectedSortOption}" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="4"
+                                  Content="Descending"
+                                  IsChecked="{Binding SortDescending}"
+                                  Margin="12,20,0,0" />
+
+                        <StackPanel Grid.Column="6"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Bottom">
+                            <Button Content="Copy address"
+                                    Command="{Binding CopyAddressCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Add to Watch"
+                                    Command="{Binding AddToWatchCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Save address"
+                                    Command="{Binding SaveAddressCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Open Hex"
+                                    Command="{Binding OpenHexCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Edit value"
+                                    Command="{Binding EditValueCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding Rows}"
+                          SelectedItem="{Binding SelectedRow,
+                                                 Mode=TwoWay,
+                                                 UpdateSourceTrigger=PropertyChanged}"
+                          VirtualizingPanel.IsVirtualizingWhenGrouping="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Address"
+                                            Binding="{Binding AddressDisplay}"
+                                            Width="190" />
+                        <DataGridTextColumn Header="Value"
+                                            Binding="{Binding ValueDisplay}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Value type"
+                                            Binding="{Binding ValueTypeDisplay}"
+                                            Width="130" />
+                        <DataGridTextColumn Header="Read status"
+                                            Binding="{Binding ReadStatusDisplay}"
+                                            Width="150" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="3" Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <ProgressBar Width="90"
+                                     Height="4"
+                                     Margin="0,0,12,0"
+                                     IsIndeterminate="True"
+                                     Visibility="{Binding IsBusy,
+                                                          Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="430" />
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="#F0A66B"
+                                   Margin="14,0,0,0"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="320" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal">
+                        <Button Content="|&lt;"
+                                Command="{Binding FirstPageCommand}"
+                                MinWidth="48"
+                                Margin="0,0,6,0"
+                                ToolTip="First page" />
+                        <Button Content="&lt;"
+                                Command="{Binding PreviousPageCommand}"
+                                MinWidth="48"
+                                Margin="0,0,12,0"
+                                ToolTip="Previous page" />
+                        <TextBlock Text="{Binding PageDisplay}"
+                                   MinWidth="150"
+                                   TextAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="SemiBold" />
+                        <Button Content="&gt;"
+                                Command="{Binding NextPageCommand}"
+                                MinWidth="48"
+                                Margin="12,0,6,0"
+                                ToolTip="Next page" />
+                        <Button Content="&gt;|"
+                                Command="{Binding LastPageCommand}"
+                                MinWidth="48"
+                                ToolTip="Last page" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding CandidateCountDisplay}"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Watch">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding Watch}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="WATCH WINDOW"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontSize="12"
+                                   FontWeight="Bold" />
+                        <TextBlock Text="Live Address Monitor"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5,0,0" />
+                        <TextBlock Text="Batch-refresh selected addresses without allowing one failed read to stop the rest."
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="13"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding EntryCountDisplay}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   Margin="0,4,0,0"
+                                   HorizontalAlignment="Right"
+                                   MaxWidth="520"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,0,0,14"
+                        Padding="14"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="210" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="ADDRESS (HEX)"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding AddressText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Example: 0x0000000012345678" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="VALUE TYPE"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding ValueTypes}"
+                                      SelectedItem="{Binding SelectedValueType}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Content="Add"
+                                Command="{Binding AddCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,18,8,0" />
+                        <Button Grid.Column="3"
+                                Content="Change type"
+                                Command="{Binding ChangeTypeCommand}"
+                                Margin="0,18,8,0" />
+                        <Button Grid.Column="4"
+                                Content="Remove"
+                                Command="{Binding RemoveCommand}"
+                                Margin="0,18,0,0" />
+
+                        <StackPanel Grid.Column="6" Margin="0,0,10,0">
+                            <TextBlock Text="REFRESH INTERVAL"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding RefreshIntervals}"
+                                      SelectedItem="{Binding SelectedRefreshInterval}"
+                                      DisplayMemberPath="Label" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="7"
+                                    Margin="0,0,10,0"
+                                    Visibility="{Binding IsCustomIntervalSelected,
+                                                         Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="CUSTOM MS"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding CustomIntervalText,
+                                                    UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="9"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Bottom">
+                            <Button Content="Pause"
+                                    Command="{Binding PauseCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Resume"
+                                    Command="{Binding ResumeCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Refresh now"
+                                    Command="{Binding RefreshCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Edit value"
+                                    Command="{Binding EditValueCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding Entries}"
+                          SelectedItem="{Binding SelectedEntry,
+                                                 Mode=TwoWay,
+                                                 UpdateSourceTrigger=PropertyChanged}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Key"
+                                            Binding="{Binding KeyDisplay}"
+                                            Width="90" />
+                        <DataGridTextColumn Header="Address"
+                                            Binding="{Binding AddressDisplay}"
+                                            Width="180" />
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding ValueTypeDisplay}"
+                                            Width="95" />
+                        <DataGridTextColumn Header="Previous value"
+                                            Binding="{Binding PreviousValueDisplay}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Current value"
+                                            Binding="{Binding CurrentValueDisplay}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Delta"
+                                            Binding="{Binding DeltaDisplay}"
+                                            Width="120" />
+                        <DataGridTextColumn Header="Last update"
+                                            Binding="{Binding LastUpdatedDisplay}"
+                                            Width="125" />
+                        <DataGridTextColumn Header="Status"
+                                            Binding="{Binding StatusDisplay}"
+                                            Width="1.4*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="3" Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <ProgressBar Width="90"
+                                     Height="4"
+                                     Margin="0,0,12,0"
+                                     IsIndeterminate="True"
+                                     Visibility="{Binding IsBusy,
+                                                          Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520" />
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Saved Addresses">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding SavedAddresses}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="SAVED ADDRESS JSON"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   FontSize="12"
+                                   FontWeight="Bold" />
+                        <TextBlock Text="Persistent Address Catalog"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Margin="0,5,0,0" />
+                        <TextBlock Text="Keep named addresses outside temporary scan data and exchange them as schema-versioned JSON."
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="13"
+                                   Margin="0,5,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding EntryCountDisplay}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding TargetDisplay}"
+                                   Foreground="{StaticResource AccentBrush}"
+                                   Margin="0,4,0,0"
+                                   HorizontalAlignment="Right" />
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,8,0,0">
+                            <Button Content="Import JSON"
+                                    Command="{Binding ImportCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Export JSON"
+                                    Command="{Binding ExportCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,0,0,14"
+                        Padding="14"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="210" />
+                            <ColumnDefinition Width="115" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="KEY"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding KeyText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Unique name, for example Counter" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="ADDRESS (HEX)"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding AddressText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Example: 0x0000000012345678" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                            <TextBlock Text="VALUE TYPE"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding ValueTypes}"
+                                      SelectedItem="{Binding SelectedValueType}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                            <TextBlock Text="DESCRIPTION"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding DescriptionText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="Optional description" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="4"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Bottom">
+                            <Button Content="Add"
+                                    Command="{Binding AddCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Rename"
+                                    Command="{Binding RenameCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Update"
+                                    Command="{Binding UpdateCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Delete"
+                                    Command="{Binding DeleteCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Edit value"
+                                    Command="{Binding EditValueCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding Entries}"
+                          SelectedItem="{Binding SelectedEntry,
+                                                 Mode=TwoWay,
+                                                 UpdateSourceTrigger=PropertyChanged}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Key"
+                                            Binding="{Binding Key}"
+                                            Width="1.2*" />
+                        <DataGridTextColumn Header="Address"
+                                            Binding="{Binding AddressDisplay}"
+                                            Width="190" />
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding ValueTypeDisplay}"
+                                            Width="110" />
+                        <DataGridTextColumn Header="Current value"
+                                            Binding="{Binding CurrentValueDisplay}"
+                                            Width="130" />
+                        <DataGridTextColumn Header="Description"
+                                            Binding="{Binding Description}"
+                                            Width="2*" />
+                        <DataGridTextColumn Header="Read status"
+                                            Binding="{Binding StatusDisplay}"
+                                            Width="1.4*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="3" Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <ProgressBar Width="90"
+                                     Height="4"
+                                     Margin="0,0,12,0"
+                                     IsIndeterminate="True"
+                                     Visibility="{Binding IsBusy,
+                                                          Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520" />
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="Memory Editor">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding MemoryEditor}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Margin="0,0,0,14"
+                        Padding="14"
+                        Background="#251B22"
+                        BorderBrush="#70404C"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1.7*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="MEMORY EDITOR"
+                                       Foreground="#F0A66B"
+                                       FontSize="12"
+                                       FontWeight="Bold" />
+                            <TextBlock Text="{Binding FeatureStatusDisplay}"
+                                       FontSize="23"
+                                       FontWeight="SemiBold"
+                                       Margin="0,4,0,0" />
+                            <TextBlock Text="{Binding RiskWarning}"
+                                       Foreground="#E0A0A8"
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,20,0" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Margin="12,0">
+                            <CheckBox Content="I acknowledge the target-stability risk"
+                                      IsChecked="{Binding AcknowledgesRisk}" />
+                            <CheckBox Content="I will edit only self-developed or explicitly authorized targets"
+                                      IsChecked="{Binding ConfirmsAuthorizedTargetsOnly}"
+                                      Margin="0,7,0,0" />
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,9,0,0">
+                                <CheckBox Content="Require confirmation"
+                                          IsChecked="{Binding RequireConfirmation}"
+                                          IsEnabled="{Binding CanConfigureFeature}"
+                                          Margin="0,0,14,0" />
+                                <CheckBox Content="Verify writes"
+                                          IsChecked="{Binding VerifyAfterWrite}"
+                                          IsEnabled="{Binding CanConfigureFeature}"
+                                          Margin="0,0,14,0" />
+                                <CheckBox Content="Allow manual address"
+                                          IsChecked="{Binding AllowManualAddress}"
+                                          IsEnabled="{Binding CanConfigureFeature}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Button Content="Enable"
+                                    Command="{Binding EnableFeatureCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Disable"
+                                    Command="{Binding DisableFeatureCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <TabControl Grid.Row="1">
+                    <TabItem Header="Editor">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <Grid Margin="0,14,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.05*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="1.35*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                        Padding="16"
+                                        Background="{StaticResource PanelBrush}"
+                                        BorderBrush="{StaticResource PanelBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <StackPanel>
+                                        <TextBlock Text="TARGET AND CURRENT VALUE"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   FontWeight="Bold" />
+
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="130" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="PROCESS"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding TargetProcessDisplay}"
+                                                           Style="{StaticResource DetailValueStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="PID"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding PidDisplay}"
+                                                           Style="{StaticResource DetailValueStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="SESSION"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding SessionStatusDisplay}"
+                                                           Style="{StaticResource DetailValueStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="ADDRESS (HEX)"
+                                                   Style="{StaticResource DetailLabelStyle}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="120" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Text="{Binding AddressText,
+                                                                    UpdateSourceTrigger=PropertyChanged}"
+                                                     ToolTip="Manual loading requires the Allow manual address setting." />
+                                            <Button Grid.Column="1"
+                                                    Content="Load manual"
+                                                    Command="{Binding LoadManualAddressCommand}"
+                                                    Margin="8,0,0,0" />
+                                        </Grid>
+
+                                        <Grid Margin="0,13,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Margin="0,0,8,0">
+                                                <TextBlock Text="VALUE TYPE"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <ComboBox ItemsSource="{Binding ValueTypes}"
+                                                          SelectedItem="{Binding SelectedValueType}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1"
+                                                        Margin="8,0,0,0">
+                                                <TextBlock Text="SOURCE"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding SourceDisplay}"
+                                                           Style="{StaticResource DetailValueStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="MEMORY REGION"
+                                                   Style="{StaticResource DetailLabelStyle}"
+                                                   Margin="0,12,0,3" />
+                                        <TextBlock Text="{Binding RegionSummary}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,0,0,14" />
+
+                                        <TextBlock Text="CURRENT VALUE"
+                                                   Style="{StaticResource DetailLabelStyle}" />
+                                        <TextBlock Text="{Binding CurrentValueDisplay}"
+                                                   FontSize="20"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,0,0,10" />
+                                        <TextBlock Text="CURRENT BYTES"
+                                                   Style="{StaticResource DetailLabelStyle}" />
+                                        <TextBlock Text="{Binding CurrentBytesDisplay}"
+                                                   FontFamily="Consolas"
+                                                   TextWrapping="Wrap" />
+
+                                        <Button Content="Refresh current value"
+                                                Command="{Binding RefreshCurrentCommand}"
+                                                Margin="0,16,0,0"
+                                                HorizontalAlignment="Left" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Column="2"
+                                        Padding="16"
+                                        Background="{StaticResource PanelBrush}"
+                                        BorderBrush="{StaticResource PanelBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <StackPanel>
+                                        <TextBlock Text="NEW VALUE AND VERIFICATION"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   FontWeight="Bold" />
+
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="145" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Margin="0,0,10,0">
+                                                <TextBlock Text="INPUT FORMAT"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <ComboBox ItemsSource="{Binding InputFormats}"
+                                                          SelectedItem="{Binding SelectedInputFormat}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="NEW VALUE"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBox Text="{Binding NewValueText,
+                                                                        UpdateSourceTrigger=PropertyChanged}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="{Binding InputErrorMessage}"
+                                                   Foreground="#F0A66B"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,7,0,0" />
+
+                                        <Grid Margin="0,14,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Margin="0,0,8,0">
+                                                <TextBlock Text="PARSED VALUE"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding ParsedValueDisplay}"
+                                                           Style="{StaticResource DetailValueStyle}" />
+                                                <TextBlock Text="HEX PREVIEW"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding HexadecimalPreview}"
+                                                           Style="{StaticResource DetailValueStyle}"
+                                                           FontFamily="Consolas" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1"
+                                                        Margin="8,0,0,0">
+                                                <TextBlock Text="NEW BYTES"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock Text="{Binding NewBytesPreview}"
+                                                           Style="{StaticResource DetailValueStyle}"
+                                                           FontFamily="Consolas" />
+                                                <TextBlock Text="BYTE ORDER / COUNT"
+                                                           Style="{StaticResource DetailLabelStyle}" />
+                                                <TextBlock>
+                                                    <Run Text="{Binding ByteOrderDisplay,
+                                                                        Mode=OneWay}" />
+                                                    <Run Text=" · " />
+                                                    <Run Text="{Binding WriteByteCountDisplay,
+                                                                        Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    Margin="0,5,0,12">
+                                            <CheckBox Content="Compare before write"
+                                                      IsChecked="{Binding CompareBeforeWrite}"
+                                                      Margin="0,0,18,0" />
+                                            <CheckBox Content="Verify after write"
+                                                      IsChecked="{Binding VerifyAfterWrite}" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="USER NOTE"
+                                                   Style="{StaticResource DetailLabelStyle}" />
+                                        <TextBox Text="{Binding UserNote,
+                                                                UpdateSourceTrigger=PropertyChanged}"
+                                                 MaxLength="1024" />
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    Margin="0,14,0,0">
+                                            <Button Content="Write once"
+                                                    Command="{Binding WriteCommand}"
+                                                    Style="{StaticResource PrimaryButtonStyle}"
+                                                    Margin="0,0,8,0" />
+                                            <Button Content="Undo last write"
+                                                    Command="{Binding UndoLastWriteCommand}"
+                                                    Margin="0,0,8,0" />
+                                            <Button Content="Cancel"
+                                                    Command="{Binding CancelCommand}" />
+                                        </StackPanel>
+
+                                        <Border Margin="0,16,0,0"
+                                                Padding="12"
+                                                Background="#0D1623"
+                                                BorderBrush="{StaticResource PanelBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="RESULT"
+                                                               Style="{StaticResource DetailLabelStyle}" />
+                                                    <TextBlock Text="{Binding ResultStatusDisplay}"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding WrittenBytesDisplay}"
+                                                               Foreground="{StaticResource MutedTextBrush}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="ORIGINAL / REQUESTED"
+                                                               Style="{StaticResource DetailLabelStyle}" />
+                                                    <TextBlock Text="{Binding ResultOriginalDisplay}"
+                                                               FontFamily="Consolas"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding ResultRequestedDisplay}"
+                                                               FontFamily="Consolas"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="READ-BACK / VERIFY"
+                                                               Style="{StaticResource DetailLabelStyle}" />
+                                                    <TextBlock Text="{Binding ResultReadBackDisplay}"
+                                                               FontFamily="Consolas"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding VerificationStatusDisplay}" />
+                                                    <TextBlock Text="{Binding FailureReasonDisplay}"
+                                                               Foreground="#F0A66B"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding AuditTimestampDisplay}"
+                                                               Foreground="{StaticResource MutedTextBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem Header="Write History">
+                        <Grid Margin="0,14,0,4">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Border Padding="12"
+                                    Margin="0,0,0,12"
+                                    Background="{StaticResource PanelBrush}"
+                                    BorderBrush="{StaticResource PanelBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding HistoryFilterText,
+                                                            UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="Filter process, address, type, result, source, or note" />
+                                    <StackPanel Grid.Column="2"
+                                                Orientation="Horizontal">
+                                        <Button Content="Refresh"
+                                                Command="{Binding RefreshHistoryCommand}"
+                                                Margin="0,0,8,0" />
+                                        <Button Content="Copy"
+                                                Command="{Binding CopyHistoryCommand}"
+                                                Margin="0,0,8,0" />
+                                        <Button Content="Retry failed"
+                                                Command="{Binding RetryFailedCommand}"
+                                                Margin="0,0,8,0" />
+                                        <Button Content="Undo last"
+                                                Command="{Binding UndoLastWriteCommand}"
+                                                Margin="0,0,8,0" />
+                                        <Button Content="Export CSV"
+                                                Command="{Binding ExportHistoryCommand}"
+                                                Style="{StaticResource PrimaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding History}"
+                                      SelectedItem="{Binding SelectedHistoryEntry,
+                                                             Mode=TwoWay}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Time"
+                                                        Binding="{Binding TimeDisplay}"
+                                                        Width="165" />
+                                    <DataGridTextColumn Header="Process"
+                                                        Binding="{Binding ProcessDisplay}"
+                                                        Width="170" />
+                                    <DataGridTextColumn Header="Address"
+                                                        Binding="{Binding AddressDisplay}"
+                                                        Width="175" />
+                                    <DataGridTextColumn Header="Type"
+                                                        Binding="{Binding TypeDisplay}"
+                                                        Width="90" />
+                                    <DataGridTextColumn Header="Original"
+                                                        Binding="{Binding OriginalDisplay}"
+                                                        Width="120" />
+                                    <DataGridTextColumn Header="Requested"
+                                                        Binding="{Binding RequestedDisplay}"
+                                                        Width="120" />
+                                    <DataGridTextColumn Header="Read-back"
+                                                        Binding="{Binding ReadBackDisplay}"
+                                                        Width="120" />
+                                    <DataGridTextColumn Header="Result"
+                                                        Binding="{Binding ResultDisplay}"
+                                                        Width="180" />
+                                    <DataGridTextColumn Header="Source"
+                                                        Binding="{Binding SourceDisplay}"
+                                                        Width="110" />
+                                    <DataGridTextColumn Header="Note"
+                                                        Binding="{Binding NoteDisplay}"
+                                                        Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Width="90"
+                                 Height="4"
+                                 Margin="0,0,12,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy,
+                                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Temporary">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding TemporaryManager}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="16"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Temporary Manager"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding TempDirectory}"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <Button Margin="0,0,8,0"
+                                    Content="Open Folder"
+                                    Command="{Binding OpenTempFolderCommand}" />
+                            <Button Margin="0,0,8,0"
+                                    Content="Auto Cleanup"
+                                    Command="{Binding AutomaticCleanupCommand}" />
+                            <Button Content="Refresh"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{Binding RefreshCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Sessions"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding SessionCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1"
+                            Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Snapshots"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding SnapshotCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2"
+                            Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Disk usage"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding TotalSize}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3"
+                            Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="RAM cache"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding CacheSize}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="4"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Incomplete files"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding IncompleteFileCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid ItemsSource="{Binding Sessions}"
+                              SelectedItem="{Binding SelectedSession,
+                                                     Mode=TwoWay}"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Session"
+                                                Binding="{Binding SessionDisplay}"
+                                                Width="*" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeDisplay}"
+                                                Width="110" />
+                            <DataGridTextColumn Header="Snapshots"
+                                                Binding="{Binding Session.SnapshotCount}"
+                                                Width="90" />
+                            <DataGridTextColumn Header="Files"
+                                                Binding="{Binding Session.FileCount}"
+                                                Width="70" />
+                            <DataGridTextColumn Header="State"
+                                                Binding="{Binding StateDisplay}"
+                                                Width="140" />
+                            <DataGridTextColumn Header="Last modified"
+                                                Binding="{Binding Session.LastModifiedAt,
+                                                                  StringFormat={}{0:G}}"
+                                                Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Column="2"
+                            Padding="16"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <StackPanel>
+                            <TextBlock Text="Safe cleanup"
+                                       FontSize="16"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,6,0,14"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="Cache is released before deletion. Scans in progress are blocked, and pinned sessions are retained by default." />
+                            <Button Margin="0,0,0,8"
+                                    Content="Delete Current Node Temp"
+                                    Command="{Binding DeleteCurrentNodeCommand}" />
+                            <ComboBox Margin="0,0,0,8"
+                                      ItemsSource="{Binding Branches}"
+                                      SelectedItem="{Binding SelectedBranch,
+                                                             Mode=TwoWay}"
+                                      DisplayMemberPath="DisplayName" />
+                            <Button Margin="0,0,0,14"
+                                    Content="Delete Branch Temp"
+                                    Command="{Binding DeleteBranchCommand}" />
+                            <Button Margin="0,0,0,8"
+                                    Content="Compact Selected Session"
+                                    Command="{Binding CompactSessionCommand}" />
+                            <Button Margin="0,0,0,8"
+                                    Content="Delete Selected Session"
+                                    Command="{Binding DeleteSessionCommand}" />
+                            <CheckBox Margin="0,4,0,12"
+                                      Content="Include pinned / force unreadable session"
+                                      IsChecked="{Binding IncludePinned,
+                                                          Mode=TwoWay}" />
+                            <Button Content="Delete All Temp"
+                                    BorderBrush="#C65D68"
+                                    Command="{Binding DeleteAllCommand}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="3" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Width="90"
+                                 Height="4"
+                                 Margin="0,0,12,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy,
+                                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Plugins">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding PluginManager}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="16"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Plugin Manager"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding PluginsDirectory}"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <Button Margin="0,0,8,0"
+                                    Content="Open Folder"
+                                    Command="{Binding OpenPluginsFolderCommand}" />
+                            <Button Content="Refresh"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Command="{Binding RefreshCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Loaded"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding LoadedCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1"
+                            Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Disabled"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding DisabledCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2"
+                            Margin="0,0,8,0"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Failed"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding FailedCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="Incompatible"
+                                       Style="{StaticResource DetailLabelStyle}" />
+                            <TextBlock Text="{Binding IncompatibleCount}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <DataGrid ItemsSource="{Binding Plugins}"
+                                  SelectedItem="{Binding SelectedPlugin,
+                                                         Mode=TwoWay}"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Plugin"
+                                                    Binding="{Binding Name}"
+                                                    Width="*" />
+                                <DataGridTextColumn Header="ID"
+                                                    Binding="{Binding Id}"
+                                                    Width="180" />
+                                <DataGridTextColumn Header="Version"
+                                                    Binding="{Binding VersionDisplay}"
+                                                    Width="80" />
+                                <DataGridTextColumn Header="Capabilities"
+                                                    Binding="{Binding CapabilitiesDisplay}"
+                                                    Width="150" />
+                                <DataGridTextColumn Header="State"
+                                                    Binding="{Binding StateDisplay}"
+                                                    Width="100" />
+                                <DataGridTextColumn Header="Error"
+                                                    Binding="{Binding ErrorDisplay}"
+                                                    Width="220" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Button Grid.Row="1"
+                                Margin="0,10,0,0"
+                                HorizontalAlignment="Left"
+                                Content="{Binding ToggleEnabledLabel}"
+                                Command="{Binding ToggleEnabledCommand}" />
+                    </Grid>
+
+                    <Border Grid.Column="2"
+                            Padding="16"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="UI Contributions"
+                                           FontSize="16"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Margin="0,5,0,12"
+                                           TextWrapping="Wrap"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           Text="Contributions use the versioned, platform-neutral command contract; plugins do not receive the host service provider." />
+                            </StackPanel>
+                            <ListBox Grid.Row="1"
+                                     ItemsSource="{Binding Contributions}"
+                                     SelectedItem="{Binding SelectedContribution,
+                                                            Mode=TwoWay}"
+                                     Background="#0D1623"
+                                     BorderBrush="{StaticResource PanelBorderBrush}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="8">
+                                            <TextBlock Text="{Binding Title}"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding KindDisplay}"
+                                                       Foreground="{StaticResource AccentBrush}"
+                                                       FontSize="11" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       Foreground="{StaticResource MutedTextBrush}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button Grid.Row="2"
+                                    Margin="0,10,0,0"
+                                    HorizontalAlignment="Left"
+                                    Content="Run Selected Contribution"
+                                    Command="{Binding ExecuteContributionCommand}" />
+                            <TextBox Grid.Row="3"
+                                     Margin="0,10,0,0"
+                                     Height="90"
+                                     IsReadOnly="True"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Text="{Binding ContributionOutput,
+                                                    Mode=OneWay}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="3" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Width="90"
+                                 Height="4"
+                                 Margin="0,0,12,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy,
+                                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding StatusMessage}"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Modules &amp; Threads">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding ProcessDetails}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="16"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Module &amp; Thread Viewer"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding TargetDisplay}"
+                                       Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Margin="0,2,0,0"
+                                       Text="{Binding LastRefreshedDisplay}"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="11" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="Refresh"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding RefreshCommand}" />
+                    </Grid>
+                </Border>
+
+                <TabControl Grid.Row="1" Margin="0,12,0,0">
+                    <TabItem Header="Modules">
+                        <Grid Margin="0,12,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding ModuleSearchText,
+                                                        UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Search name, path, version, or address" />
+                                <ComboBox Grid.Column="1"
+                                          Margin="8,0"
+                                          ItemsSource="{Binding ModuleSortOptions}"
+                                          SelectedItem="{Binding SelectedModuleSort}" />
+                                <CheckBox Grid.Column="2"
+                                          Margin="4,0,12,0"
+                                          Content="Descending"
+                                          IsChecked="{Binding ModuleSortDescending}" />
+                                <TextBlock Grid.Column="3"
+                                           Text="{Binding ModuleCountDisplay}"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Modules}"
+                                      SelectedItem="{Binding SelectedModule,
+                                                             Mode=TwoWay}"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name"
+                                                        Binding="{Binding Name}"
+                                                        Width="180" />
+                                    <DataGridTextColumn Header="Base Address"
+                                                        Binding="{Binding BaseAddressDisplay}"
+                                                        Width="155" />
+                                    <DataGridTextColumn Header="Size"
+                                                        Binding="{Binding SizeDisplay}"
+                                                        Width="100" />
+                                    <DataGridTextColumn Header="Path"
+                                                        Binding="{Binding PathDisplay}"
+                                                        Width="*" />
+                                    <DataGridTextColumn Header="Version"
+                                                        Binding="{Binding VersionDisplay}"
+                                                        Width="125" />
+                                    <DataGridTextColumn Header="Warning"
+                                                        Binding="{Binding WarningDisplay}"
+                                                        Width="220" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Threads">
+                        <Grid Margin="0,12,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding ThreadSearchText,
+                                                        UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Search thread ID or state" />
+                                <ComboBox Grid.Column="1"
+                                          Margin="8,0"
+                                          ItemsSource="{Binding ThreadSortOptions}"
+                                          SelectedItem="{Binding SelectedThreadSort}" />
+                                <CheckBox Grid.Column="2"
+                                          Margin="4,0,12,0"
+                                          Content="Descending"
+                                          IsChecked="{Binding ThreadSortDescending}" />
+                                <TextBlock Grid.Column="3"
+                                           Text="{Binding ThreadCountDisplay}"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Threads}"
+                                      SelectedItem="{Binding SelectedThread,
+                                                             Mode=TwoWay}"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Thread ID"
+                                                        Binding="{Binding ThreadId}"
+                                                        Width="110" />
+                                    <DataGridTextColumn Header="State"
+                                                        Binding="{Binding StateDisplay}"
+                                                        Width="150" />
+                                    <DataGridTextColumn Header="Priority"
+                                                        Binding="{Binding PriorityDisplay}"
+                                                        Width="100" />
+                                    <DataGridTextColumn Header="Start Time"
+                                                        Binding="{Binding StartTimeDisplay}"
+                                                        Width="190" />
+                                    <DataGridTextColumn Header="CPU Time"
+                                                        Binding="{Binding CpuTimeDisplay}"
+                                                        Width="140" />
+                                    <DataGridTextColumn Header="Warning"
+                                                        Binding="{Binding WarningDisplay}"
+                                                        Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Width="90"
+                                 Height="4"
+                                 Margin="0,0,12,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy,
+                                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Margin="14,0,0,0"
+                                   Text="{Binding WarningMessage}"
+                                   Foreground="#E2C06B"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#F0A66B"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="520"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Hex Viewer">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding HexViewer}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="16"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Hex Viewer"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding TargetDisplay}"
+                                       Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Margin="0,2,0,0"
+                                       Text="{Binding WindowRangeDisplay}"
+                                       FontFamily="Consolas"
+                                       Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1"
+                                    HorizontalAlignment="Right">
+                            <TextBlock Text="READ-ONLY • 4 KiB WINDOW"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontWeight="Bold"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="{Binding LastRefreshedDisplay}"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1"
+                        Margin="0,12,0,12"
+                        Padding="14"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="JUMP TO ADDRESS (HEX)"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding AddressText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="Consolas" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="Jump"
+                                Command="{Binding JumpCommand}"
+                                Margin="8,18,0,0"
+                                Style="{StaticResource PrimaryButtonStyle}" />
+
+                        <StackPanel Grid.Column="3">
+                            <TextBlock Text="SEARCH BYTES"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <TextBox Text="{Binding SearchText,
+                                                    UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="Consolas"
+                                     ToolTip="Example: DE AD BE EF" />
+                        </StackPanel>
+                        <Button Grid.Column="4"
+                                Content="Search page"
+                                Command="{Binding SearchCommand}"
+                                Margin="8,18,0,0" />
+
+                        <StackPanel Grid.Column="6"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Bottom">
+                            <Button Content="Previous"
+                                    Command="{Binding PreviousPageCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Next"
+                                    Command="{Binding NextPageCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Refresh"
+                                    Command="{Binding RefreshCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding Rows}"
+                          SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+                          IsReadOnly="True"
+                          EnableRowVirtualization="True"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Address"
+                                            Binding="{Binding AddressDisplay}"
+                                            Width="180" />
+                        <DataGridTextColumn Header="Offset"
+                                            Binding="{Binding OffsetDisplay}"
+                                            Width="110" />
+                        <DataGridTextColumn Header="Hex bytes"
+                                            Binding="{Binding HexDisplay}"
+                                            Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontFamily"
+                                            Value="Consolas" />
+                                    <Setter Property="FontSize"
+                                            Value="13" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="ASCII"
+                                            Binding="{Binding AsciiDisplay}"
+                                            Width="170">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontFamily"
+                                            Value="Consolas" />
+                                    <Setter Property="FontSize"
+                                            Value="13" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridCheckBoxColumn Header="Match"
+                                                Binding="{Binding IsSearchMatch}"
+                                                Width="70" />
+                        <DataGridCheckBoxColumn Header="Partial"
+                                                Binding="{Binding HasUnreadableBytes}"
+                                                Width="70" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="3" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Width="90"
+                                 Height="4"
+                                 Margin="0,0,12,0"
+                                 IsIndeterminate="True"
+                                 Visibility="{Binding IsBusy,
+                                                      Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <StackPanel Grid.Column="1">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Foreground="{StaticResource MutedTextBrush}" />
+                            <TextBlock Margin="14,0,0,0"
+                                       Text="{Binding WarningMessage}"
+                                       Foreground="#E2C06B" />
+                        </StackPanel>
+                        <TextBlock Margin="0,3,0,0"
+                                   Text="{Binding InputMessage}"
+                                   Foreground="#F0A66B" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal">
+                        <TextBlock Text="{Binding SearchMatchDisplay}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,18,0" />
+                        <TextBlock Text="{Binding PageDisplay}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Snapshot Compare">
+            <Grid Margin="0,16,0,0"
+                  DataContext="{Binding SnapshotCompare}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="16"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Snapshot Compare"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Text="Streaming address merge • two 4,096-record cursors • 500 rows per view"
+                                       Foreground="{StaticResource MutedTextBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <Button Content="Refresh nodes"
+                                    Command="{Binding RefreshNodesCommand}"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Export CSV"
+                                    Command="{Binding ExportCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,12,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <StackPanel>
+                            <TextBlock Text="LEFT SNAPSHOT"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding Nodes}"
+                                      SelectedItem="{Binding SelectedLeft}"
+                                      DisplayMemberPath="DisplayName" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2"
+                            Padding="12"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <StackPanel>
+                            <TextBlock Text="RIGHT SNAPSHOT"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       FontSize="10"
+                                       Margin="2,0,0,5" />
+                            <ComboBox ItemsSource="{Binding Nodes}"
+                                      SelectedItem="{Binding SelectedRight}"
+                                      DisplayMemberPath="DisplayName" />
+                        </StackPanel>
+                    </Border>
+                    <Button Grid.Column="4"
+                            Content="Compare"
+                            Command="{Binding CompareCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            MinWidth="110" />
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <UniformGrid Columns="6" Margin="0,0,0,12">
+                        <Border Margin="0,0,6,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="ADDED"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding AddedDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="6,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="REMOVED"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding RemovedDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="6,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="CHANGED"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding ChangedDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="6,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="UNCHANGED"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding UnchangedDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="6,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="COUNT Δ"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding CountDifferenceDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Margin="6,0,0,0"
+                                Padding="12"
+                                Background="{StaticResource PanelBrush}"
+                                CornerRadius="6">
+                            <StackPanel>
+                                <TextBlock Text="STORAGE Δ"
+                                           Foreground="{StaticResource MutedTextBrush}"
+                                           FontSize="10" />
+                                <TextBlock Text="{Binding StorageDifferenceDisplay}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Rows}"
+                              IsReadOnly="True"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              ScrollViewer.CanContentScroll="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Address"
+                                                Binding="{Binding AddressDisplay}"
+                                                Width="190" />
+                            <DataGridTextColumn Header="Kind"
+                                                Binding="{Binding Kind}"
+                                                Width="120" />
+                            <DataGridTextColumn Header="Left value"
+                                                Binding="{Binding LeftValueDisplay}"
+                                                Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily"
+                                                Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Right value"
+                                                Binding="{Binding RightValueDisplay}"
+                                                Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily"
+                                                Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <Grid Grid.Row="3" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <ProgressBar Width="120"
+                                     Height="6"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding ProgressPercentage,
+                                                     Mode=OneWay}"
+                                     Margin="0,0,12,0"
+                                     VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding ErrorMessage}"
+                                   Foreground="#F0A66B"
+                                   Margin="14,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal">
+                        <Button Content="|&lt;"
+                                Command="{Binding FirstPageCommand}"
+                                MinWidth="48"
+                                Margin="0,0,6,0" />
+                        <Button Content="&lt;"
+                                Command="{Binding PreviousPageCommand}"
+                                MinWidth="48"
+                                Margin="0,0,12,0" />
+                        <TextBlock Text="{Binding PageDisplay}"
+                                   MinWidth="150"
+                                   TextAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="SemiBold" />
+                        <Button Content="&gt;"
+                                Command="{Binding NextPageCommand}"
+                                MinWidth="48"
+                                Margin="12,0,6,0" />
+                        <Button Content="&gt;|"
+                                Command="{Binding LastPageCommand}"
+                                MinWidth="48" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ResultCountDisplay}"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

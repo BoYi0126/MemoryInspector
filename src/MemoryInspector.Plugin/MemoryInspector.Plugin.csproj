@@ -5,6 +5,9 @@
     <AssemblyName>MemoryInspector.Plugin</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MemoryInspector.Common\MemoryInspector.Common.csproj" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,10 @@
 using System.Globalization;
 using MemoryInspector.Application.Configuration;
 using MemoryInspector.Application.Logging;
+using MemoryInspector.Application.Monitoring;
 using MemoryInspector.Application.Processes;
 using MemoryInspector.Common;
+using MemoryInspector.Core.Monitoring;
 using MemoryInspector.Core.Processes;
 using MemoryInspector.Wpf.Mvvm;
 
@@ -13,6 +15,8 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
     private readonly object _refreshSync = new();
     private readonly ISystemProcessService _processService;
     private readonly IAppLogger _logger;
+    private readonly IMonitoringSessionService? _monitoringSessionService;
+    private readonly SynchronizationContext? _synchronizationContext;
     private IReadOnlyList<ProcessSummary> _allProcesses =
         Array.Empty<ProcessSummary>();
     private IReadOnlyList<ProcessRowViewModel> _processes =
@@ -30,21 +34,61 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
     private bool _isBusy;
     private string _statusMessage = "Ready to scan running processes.";
     private DateTimeOffset? _lastRefreshedAt;
+    private MonitoringSession? _currentSession;
     private TimeSpan _autoRefreshInterval = TimeSpan.FromSeconds(2);
     private bool _disposed;
 
     public ProcessExplorerViewModel(
         ISystemProcessService processService,
         IAppLogger logger)
+        : this(
+            processService,
+            logger,
+            monitoringSessionService: null,
+            initialize: true)
+    {
+    }
+
+    public ProcessExplorerViewModel(
+        ISystemProcessService processService,
+        IAppLogger logger,
+        IMonitoringSessionService monitoringSessionService)
+        : this(
+            processService,
+            logger,
+            Guard.NotNull(monitoringSessionService),
+            initialize: true)
+    {
+    }
+
+    private ProcessExplorerViewModel(
+        ISystemProcessService processService,
+        IAppLogger logger,
+        IMonitoringSessionService? monitoringSessionService,
+        bool initialize)
     {
         _processService = Guard.NotNull(processService);
         _logger = Guard.NotNull(logger);
+        _monitoringSessionService = monitoringSessionService;
+        _synchronizationContext = SynchronizationContext.Current;
+        _currentSession = monitoringSessionService?.CurrentSession;
         RefreshCommand = new AsyncRelayCommand(
             () => RefreshAsync(),
             () => !IsBusy);
-        StartMonitoringCommand = new RelayCommand(
-            RequestStartMonitoring,
-            () => SelectedProcess?.CanStartMonitoring == true);
+        StartMonitoringCommand = new AsyncRelayCommand(
+            RequestStartMonitoringAsync,
+            () =>
+                SelectedProcess?.CanStartMonitoring == true &&
+                !IsSessionActive);
+        StopMonitoringCommand = new AsyncRelayCommand(
+            StopMonitoringAsync,
+            () => IsSessionActive);
+
+        if (_monitoringSessionService is not null)
+        {
+            _monitoringSessionService.SessionChanged +=
+                OnMonitoringSessionChanged;
+        }
     }
 
     public event EventHandler<ProcessMonitoringRequestedEventArgs>?
@@ -192,9 +236,44 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
     public string ProcessCountDisplay =>
         $"{Processes.Count:N0} of {_allProcesses.Count:N0} processes";
 
+    public MonitoringSession? CurrentSession
+    {
+        get => _currentSession;
+        private set
+        {
+            if (!SetProperty(ref _currentSession, value))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(SessionStateDisplay));
+            OnPropertyChanged(nameof(SessionStatusMessage));
+            OnPropertyChanged(nameof(SessionIdentityDisplay));
+            OnPropertyChanged(nameof(IsSessionActive));
+            StartMonitoringCommand.NotifyCanExecuteChanged();
+            StopMonitoringCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public string SessionStateDisplay =>
+        CurrentSession?.State.ToString() ?? "Disconnected";
+
+    public string SessionStatusMessage =>
+        CurrentSession?.StatusMessage ?? "No active monitoring session.";
+
+    public string SessionIdentityDisplay => CurrentSession is null
+        ? "No target selected"
+        : $"{CurrentSession.Identity.ProcessName} " +
+          $"(PID {CurrentSession.Identity.ProcessId}, " +
+          $"{CurrentSession.Identity.Architecture})";
+
+    public bool IsSessionActive => CurrentSession?.IsActive == true;
+
     public AsyncRelayCommand RefreshCommand { get; }
 
-    public RelayCommand StartMonitoringCommand { get; }
+    public AsyncRelayCommand StartMonitoringCommand { get; }
+
+    public AsyncRelayCommand StopMonitoringCommand { get; }
 
     public async Task InitializeAsync(
         AppSettings settings,
@@ -304,6 +383,12 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
             _refreshCancellation?.Cancel();
             _refreshCancellation?.Dispose();
             _refreshCancellation = null;
+        }
+
+        if (_monitoringSessionService is not null)
+        {
+            _monitoringSessionService.SessionChanged -=
+                OnMonitoringSessionChanged;
         }
 
         _disposed = true;
@@ -453,7 +538,7 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
                 .ThenBy(selector);
     }
 
-    private void RequestStartMonitoring()
+    private async Task RequestStartMonitoringAsync()
     {
         if (SelectedProcess?.CanStartMonitoring != true)
         {
@@ -466,6 +551,61 @@ public sealed class ProcessExplorerViewModel : ObservableObject, IDisposable
         StartMonitoringRequested?.Invoke(
             this,
             new ProcessMonitoringRequestedEventArgs(SelectedProcess));
+
+        if (_monitoringSessionService is null)
+        {
+            return;
+        }
+
+        var identity = new MonitoringSessionIdentity(
+            SelectedProcess.ProcessId,
+            SelectedProcess.StartTime!.Value,
+            SelectedProcess.Architecture,
+            SelectedProcess.ProcessName);
+        var result = await _monitoringSessionService.StartAsync(identity);
+
+        if (result.IsFailure)
+        {
+            StatusMessage = result.Error.ToDisplayMessage();
+        }
+    }
+
+    private async Task StopMonitoringAsync()
+    {
+        if (_monitoringSessionService is null)
+        {
+            return;
+        }
+
+        var result = await _monitoringSessionService.StopAsync();
+
+        if (result.IsFailure)
+        {
+            StatusMessage = result.Error.ToDisplayMessage();
+        }
+    }
+
+    private void OnMonitoringSessionChanged(
+        object? sender,
+        MonitoringSessionChangedEventArgs eventArgs)
+    {
+        if (_synchronizationContext is not null &&
+            SynchronizationContext.Current != _synchronizationContext)
+        {
+            _synchronizationContext.Post(
+                _ => ApplyMonitoringSession(eventArgs.Session),
+                null);
+            return;
+        }
+
+        ApplyMonitoringSession(eventArgs.Session);
+    }
+
+    private void ApplyMonitoringSession(MonitoringSession session)
+    {
+        CurrentSession = session;
+        StatusMessage = session.StatusMessage ??
+            $"Monitoring session state: {session.State}.";
     }
 
     private void StartAutoRefresh()

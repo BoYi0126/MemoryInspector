@@ -20,5 +20,9 @@ public interface IAppPathService
 
     string LogsDirectory { get; }
 
+    string AuditDirectory { get; }
+
+    string MemoryEditorAuditDirectory { get; }
+
     Result EnsureDirectories();
 }

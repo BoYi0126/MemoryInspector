@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MemoryInspector.SamplePlugin</RootNamespace>
+    <AssemblyName>MemoryInspector.SamplePlugin</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MemoryInspector.Plugin\MemoryInspector.Plugin.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="plugin.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

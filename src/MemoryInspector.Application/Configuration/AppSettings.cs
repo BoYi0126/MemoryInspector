@@ -1,10 +1,13 @@
 using MemoryInspector.Common;
+using MemoryInspector.Application.Memory.Editing;
 
 namespace MemoryInspector.Application.Configuration;
 
 public sealed record AppSettings
 {
     public const int CurrentSchemaVersion = 1;
+    public const int MinimumWatchRefreshIntervalMilliseconds = 50;
+    public const int MaximumWatchRefreshIntervalMilliseconds = 60_000;
 
     public int SchemaVersion { get; init; } = CurrentSchemaVersion;
 
@@ -13,6 +16,8 @@ public sealed record AppSettings
     public int CachedNodeCount { get; init; } = 3;
 
     public int PageSize { get; init; } = 1_000;
+
+    public long MemoryOnlyThreshold { get; init; } = 100_000;
 
     public long SnapshotThreshold { get; init; } = 1_000_000;
 
@@ -23,6 +28,9 @@ public sealed record AppSettings
     public int WatchRefreshIntervalMilliseconds { get; init; } = 500;
 
     public double DefaultNumericTolerance { get; init; } = 0.0001d;
+
+    public MemoryEditorSettings MemoryEditor { get; init; } =
+        MemoryEditorSettings.CreateDefault();
 
     public static AppSettings CreateDefault() => new();
 
@@ -45,14 +53,27 @@ public sealed record AppSettings
             return ValidationFailure("Cached node count must be greater than zero.");
         }
 
-        if (PageSize <= 0)
+        if (PageSize <= 0 || PageSize > 1_000_000)
         {
-            return ValidationFailure("Page size must be greater than zero.");
+            return ValidationFailure(
+                "Page size must be between 1 and 1,000,000.");
+        }
+
+        if (MemoryOnlyThreshold <= 0)
+        {
+            return ValidationFailure(
+                "Memory-only threshold must be greater than zero.");
         }
 
         if (SnapshotThreshold <= 0)
         {
             return ValidationFailure("Snapshot threshold must be greater than zero.");
+        }
+
+        if (MemoryOnlyThreshold > SnapshotThreshold)
+        {
+            return ValidationFailure(
+                "Memory-only threshold cannot exceed the snapshot threshold.");
         }
 
         if (TempRetentionDays < 0)
@@ -66,10 +87,15 @@ public sealed record AppSettings
                 "Process refresh interval must be greater than zero.");
         }
 
-        if (WatchRefreshIntervalMilliseconds <= 0)
+        if (WatchRefreshIntervalMilliseconds <
+                MinimumWatchRefreshIntervalMilliseconds ||
+            WatchRefreshIntervalMilliseconds >
+                MaximumWatchRefreshIntervalMilliseconds)
         {
             return ValidationFailure(
-                "Watch refresh interval must be greater than zero.");
+                $"Watch refresh interval must be between " +
+                $"{MinimumWatchRefreshIntervalMilliseconds} and " +
+                $"{MaximumWatchRefreshIntervalMilliseconds} milliseconds.");
         }
 
         if (!double.IsFinite(DefaultNumericTolerance) ||
@@ -77,6 +103,19 @@ public sealed record AppSettings
         {
             return ValidationFailure(
                 "Default numeric tolerance must be a finite, non-negative number.");
+        }
+
+        if (MemoryEditor is null)
+        {
+            return ValidationFailure(
+                "Memory Editor settings are required.");
+        }
+
+        var memoryEditorValidation = MemoryEditor.Validate();
+
+        if (memoryEditorValidation.IsFailure)
+        {
+            return memoryEditorValidation;
         }
 
         return Result.Success();

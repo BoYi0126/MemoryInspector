@@ -76,6 +76,7 @@ public sealed class ProcessRowViewModel
     public bool CanStartMonitoring =>
         !IsStale &&
         Summary.StartTime.HasValue &&
+        Summary.Architecture != ProcessArchitecture.Unknown &&
         Summary.AccessStatus is
             ProcessAccessStatus.Available or
             ProcessAccessStatus.Partial;

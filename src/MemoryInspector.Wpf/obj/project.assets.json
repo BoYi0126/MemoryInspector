@@ -50,7 +50,10 @@
         },
         "runtime": {
           "bin/placeholder/MemoryInspector.Plugin.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "MemoryInspector.Windows/1.0.0": {
         "type": "project",

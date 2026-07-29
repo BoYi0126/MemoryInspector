@@ -154,6 +154,37 @@ public sealed class ProcessExplorerViewModelTests
     }
 
     [TestMethod]
+    public async Task MonitoringCommandsStartAndStopTheSession()
+    {
+        var processService = new QueueProcessService(
+            [ProcessSummaryFactory.Create(42, "Target")]);
+        var monitoringService = new RecordingMonitoringSessionService();
+        using var viewModel = new ProcessExplorerViewModel(
+            processService,
+            new TestLogger(),
+            monitoringService);
+        await viewModel.InitializeAsync(AppSettings.CreateDefault());
+        viewModel.SelectedProcess = viewModel.Processes.Single();
+
+        await viewModel.StartMonitoringCommand.ExecuteAsync();
+
+        Assert.IsNotNull(monitoringService.StartedIdentity);
+        Assert.AreEqual(42, monitoringService.StartedIdentity.ProcessId);
+        Assert.AreEqual("Target", monitoringService.StartedIdentity.ProcessName);
+        Assert.AreEqual(
+            ProcessArchitecture.X64,
+            monitoringService.StartedIdentity.Architecture);
+        Assert.AreEqual("Connected", viewModel.SessionStateDisplay);
+        Assert.IsTrue(viewModel.IsSessionActive);
+
+        await viewModel.StopMonitoringCommand.ExecuteAsync();
+
+        Assert.AreEqual(1, monitoringService.StopCount);
+        Assert.AreEqual("Disconnected", viewModel.SessionStateDisplay);
+        Assert.IsFalse(viewModel.IsSessionActive);
+    }
+
+    [TestMethod]
     public async Task RefreshRemainsAsynchronousWhileTheServiceIsRunning()
     {
         var started = new TaskCompletionSource(

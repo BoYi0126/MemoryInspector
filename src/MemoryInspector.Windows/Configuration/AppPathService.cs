@@ -13,6 +13,7 @@ public sealed class AppPathService : IAppPathService
         "SavedAddresses",
         "Plugins",
         "Logs",
+        "Audit",
     ];
 
     public AppPathService()
@@ -34,6 +35,10 @@ public sealed class AppPathService : IAppPathService
         SavedAddressesDirectory = Path.Combine(RootDirectory, DirectoryNames[3]);
         PluginsDirectory = Path.Combine(RootDirectory, DirectoryNames[4]);
         LogsDirectory = Path.Combine(RootDirectory, DirectoryNames[5]);
+        AuditDirectory = Path.Combine(RootDirectory, DirectoryNames[6]);
+        MemoryEditorAuditDirectory = Path.Combine(
+            AuditDirectory,
+            "MemoryEditor");
     }
 
     public string RootDirectory { get; }
@@ -52,6 +57,10 @@ public sealed class AppPathService : IAppPathService
 
     public string LogsDirectory { get; }
 
+    public string AuditDirectory { get; }
+
+    public string MemoryEditorAuditDirectory { get; }
+
     public Result EnsureDirectories()
     {
         try
@@ -63,6 +72,8 @@ public sealed class AppPathService : IAppPathService
                 Directory.CreateDirectory(
                     Path.Combine(RootDirectory, directoryName));
             }
+
+            Directory.CreateDirectory(MemoryEditorAuditDirectory);
 
             return Result.Success();
         }

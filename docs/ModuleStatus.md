@@ -3,14 +3,15 @@
 | 模組 | 專案 | 狀態 | 目前範圍 |
 |---|---|---|---|
 | Common | `MemoryInspector.Common` | Phase 02 完成 | 已提供 Result Pattern、Error chaining、Guard、PagedResult、OperationProgress 與格式化工具。 |
-| Core | `MemoryInspector.Core` | Phase 04 完成 | 已提供 ProcessSummary、ProcessArchitecture 與 ProcessAccessStatus；Scanner 等領域功能仍待後續 Phase。 |
-| Application | `MemoryInspector.Application` | Phase 04 完成 | 已提供設定／日誌契約與 ISystemProcessService；其他 Use case 仍待後續 Phase。 |
-| Windows Adapter | `MemoryInspector.Windows` | Phase 04 完成 | 已實作設定、日誌及具欄位級錯誤隔離的 Windows Process 列舉與架構偵測。 |
-| Plugin | `MemoryInspector.Plugin` | 架構完成 | Plugin contracts 與 discovery 邊界；尚未實作 framework。 |
-| WPF | `MemoryInspector.Wpf` | Phase 05 完成 | 已提供虛擬化 Process Explorer、非同步／自動更新、篩選、排序、詳情與 Phase 06 Monitoring 命令邊界。 |
-| Core Tests | `MemoryInspector.Core.Tests` | Phase 02 完成 | 已涵蓋 Result、Error、Guard、Pagination、Progress、Byte 與 Hex 格式化及架構邊界。 |
-| Windows Tests | `MemoryInspector.Windows.Tests` | Phase 04 完成 | 已涵蓋設定／日誌，以及空清單、程序結束、Access Denied、取消、CPU、handle 釋放與 live process 列舉。 |
-| Integration Tests | `MemoryInspector.IntegrationTests` | Phase 05 完成 | 已涵蓋 composition root，以及 Process Explorer refresh、filter、sort、selection、auto refresh 與命令行為。 |
+| Core | `MemoryInspector.Core` | Phase 29 完成 | 除 Scan／Memory Editor models 外，已提供 nullable Module／Thread 欄位與 row-level warning 純模型；不依賴 Native API。 |
+| Application | `MemoryInspector.Application` | Phase 31 完成 | 除既有 orchestration contracts 外，已提供 Snapshot Difference／Summary／Page models、雙 cursor streaming merge、layout validation、進度、分頁與 streaming visitor。 |
+| Windows Adapter | `MemoryInspector.Windows` | Phase 31 完成 | 除既有 Adapter 外，已提供 Snapshot Comparison CSV streaming export、temporary-file cleanup、flush-to-disk 與 success-only atomic replace。 |
+| Plugin | `MemoryInspector.Plugin` | Phase 28 完成 | 已提供 API 1.0 contracts、manifest validation、五種 capability、collectible loader、per-plugin DI、activation store、file log、failure／timeout isolation 與平台中立 UI contribution。 |
+| WPF | `MemoryInspector.Wpf` | Phase 33 完成 | 除既有功能外，已通過封裝後實際啟動 smoke test，所有 display-only Run／TextBox／Progress binding 明確採 OneWay。 |
+| Core Tests | `MemoryInspector.Core.Tests` | Phase 32 驗證完成 | 126 個 Core／Common tests 通過，涵蓋 Scan matcher、Memory Editor serializer、monitoring 與跨平台純模型。 |
+| Windows Tests | `MemoryInspector.Windows.Tests` | Phase 32 完成 | 106 個 Adapter tests 通過；效能驗證涵蓋 Snapshot 讀寫／RAM／Stream、live-read Handle 與 Temp cleanup。 |
+| Integration Tests | `MemoryInspector.IntegrationTests` | Phase 32 完成 | 170 個跨模組／UI tests 通過；效能驗證涵蓋 Filter、Undo／Branch、Watch 長時間執行與快速 paging cancellation。 |
+| Release Packaging | `scripts/Publish-Release.ps1` | Phase 33 完成 | 產生 v1.0.0 win-x64 self-contained portable／symbols ZIP、manifest、SHA-256、Sample Plugin、Test Target，並驗證內容與啟動。 |
 
 ## 專案相依方向
 

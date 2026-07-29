@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "memoryinspector.sample",
+  "name": "MemoryInspector Sample Plugin",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "minimumHostVersion": "1.0.0",
+  "maximumHostVersion": "1.0.0",
+  "entryAssembly": "MemoryInspector.SamplePlugin.dll",
+  "entryType": "MemoryInspector.SamplePlugin.SamplePluginModule",
+  "capabilities": [
+    "analyzer"
+  ],
+  "description": "Demonstrates isolated services, logging, and a UI contribution.",
+  "author": "MemoryInspector",
+  "enabledByDefault": true
+}

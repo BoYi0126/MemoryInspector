@@ -3,5 +3,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>MemoryInspector</Product>
+    <Authors>MemoryInspector Contributors</Authors>
+    <Copyright>Copyright © 2026 MemoryInspector Contributors</Copyright>
+    <Description>x64 Windows memory inspection and analysis platform.</Description>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 </Project>

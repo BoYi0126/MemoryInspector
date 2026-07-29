@@ -22,6 +22,12 @@ public sealed class AppPathServiceTests
         Assert.IsTrue(Directory.Exists(service.SavedAddressesDirectory));
         Assert.IsTrue(Directory.Exists(service.PluginsDirectory));
         Assert.IsTrue(Directory.Exists(service.LogsDirectory));
+        Assert.IsTrue(Directory.Exists(service.AuditDirectory));
+        Assert.IsTrue(
+            Directory.Exists(service.MemoryEditorAuditDirectory));
+        Assert.AreNotEqual(
+            service.LogsDirectory,
+            service.MemoryEditorAuditDirectory);
         Assert.AreEqual(
             Path.Combine(service.ConfigDirectory, "settings.json"),
             service.SettingsFilePath);

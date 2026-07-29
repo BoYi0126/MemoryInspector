@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MemoryInspector.Application.Configuration;
 using MemoryInspector.Application.Logging;
+using MemoryInspector.Application.Memory.Editing;
 using MemoryInspector.Windows.Configuration;
 
 namespace MemoryInspector.Windows.Tests.Configuration;
@@ -31,6 +32,14 @@ public sealed class JsonSettingsServiceTests
 
         var json = await File.ReadAllTextAsync(paths.SettingsFilePath);
         Assert.IsTrue(json.Contains("\"schemaVersion\": 1", StringComparison.Ordinal));
+        Assert.IsTrue(
+            json.Contains(
+                "\"memoryEditor\"",
+                StringComparison.Ordinal));
+        Assert.IsTrue(
+            json.Contains(
+                "\"enabled\": false",
+                StringComparison.Ordinal));
     }
 
     [TestMethod]
@@ -49,6 +58,21 @@ public sealed class JsonSettingsServiceTests
             PageSize = 250,
             TempRetentionDays = 14,
             WatchRefreshIntervalMilliseconds = 1_000,
+            MemoryEditor = new MemoryEditorSettings
+            {
+                Enabled = true,
+                EnabledAt = new DateTimeOffset(
+                    2026,
+                    7,
+                    29,
+                    12,
+                    0,
+                    0,
+                    TimeSpan.Zero),
+                RequireConfirmation = true,
+                VerifyAfterWrite = true,
+                AllowManualAddress = false,
+            },
         };
 
         var saveResult = await service.SaveAsync(expected);

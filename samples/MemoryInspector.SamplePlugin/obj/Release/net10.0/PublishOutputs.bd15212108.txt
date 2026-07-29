@@ -1,0 +1,8 @@
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\plugin.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.SamplePlugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.SamplePlugin.deps.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.SamplePlugin.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.Common.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.Plugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.Plugin.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\artifacts\release\.build-MemoryInspector-1.0.0-win-x64\sample-plugin\MemoryInspector.Common.pdb

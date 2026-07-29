@@ -8,9 +8,12 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\samples\MemoryInspector.SamplePlugin\MemoryInspector.SamplePlugin.csproj" />
     <ProjectReference Include="..\..\src\MemoryInspector.Application\MemoryInspector.Application.csproj" />
     <ProjectReference Include="..\..\src\MemoryInspector.Plugin\MemoryInspector.Plugin.csproj" />
     <ProjectReference Include="..\..\src\MemoryInspector.Windows\MemoryInspector.Windows.csproj" />
     <ProjectReference Include="..\..\src\MemoryInspector.Wpf\MemoryInspector.Wpf.csproj" />
+    <ProjectReference Include="..\MemoryInspector.TestTarget\MemoryInspector.TestTarget.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

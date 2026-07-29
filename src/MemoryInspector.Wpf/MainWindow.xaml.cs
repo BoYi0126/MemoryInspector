@@ -5,7 +5,7 @@ namespace MemoryInspector.Wpf;
 
 public partial class MainWindow : Window
 {
-    public MainWindow(ProcessExplorerViewModel viewModel)
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
         DataContext = viewModel;

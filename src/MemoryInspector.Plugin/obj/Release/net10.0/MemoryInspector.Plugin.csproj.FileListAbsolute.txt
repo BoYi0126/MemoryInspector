@@ -1,0 +1,16 @@
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\bin\Release\net10.0\MemoryInspector.Plugin.deps.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\bin\Release\net10.0\MemoryInspector.Plugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\bin\Release\net10.0\MemoryInspector.Plugin.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\bin\Release\net10.0\MemoryInspector.Common.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\bin\Release\net10.0\MemoryInspector.Common.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.csproj.AssemblyReference.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.AssemblyInfoInputs.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.AssemblyInfo.cs
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.csproj.CoreCompileInputs.cache
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.sourcelink.json
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryIn.CD9D896E.Up2Date
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\refint\MemoryInspector.Plugin.dll
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\MemoryInspector.Plugin.pdb
+C:\Users\吳柏逸(BobWu)TWTAI\source\repos\MemoryInspector\src\MemoryInspector.Plugin\obj\Release\net10.0\ref\MemoryInspector.Plugin.dll
