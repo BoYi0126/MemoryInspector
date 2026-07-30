@@ -2,6 +2,19 @@
 
 All notable changes to MemoryInspector are documented here. Versions follow Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+
+- Dedicated WPF Scan workbench for Exact/Unknown First Scan, estimation, Next Scan, progress, cancellation, Pending review, Keep/Discard, and Results navigation.
+- Exact initial snapshot workflow that preserves the target process's actual matched bytes and atomically starts the Filter Pipeline.
+- Session-bound scan orchestration with snapshot-node allocation and rollback on failed pipeline activation.
+
+### Changed
+
+- Main-window navigation uses named tab identifiers so the new Scan tab does not break existing Hex Viewer or Memory Editor routes.
+- Scanner and User guides now document the interactive workbench while distinguishing it from the previously published v1.0.0 package.
+
 ## [1.0.0] - 2026-07-29
 
 ### Added
@@ -29,4 +42,3 @@ All notable changes to MemoryInspector are documented here. Versions follow Sema
 - The portable package is not code-signed and does not include MSI/MSIX registration.
 - The stock WPF shell does not yet expose a dedicated first/next-scan command panel; scan orchestration is available through Application services for host integration.
 - Application data is local but not encrypted by the application.
-

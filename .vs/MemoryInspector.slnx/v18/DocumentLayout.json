@@ -1,7 +1,20 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7861B2FB-2707-731B-5209-6222D388FA7A}|tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj|c:\\users\\\u5433\u67CF\u9038(bobwu)twtai\\source\\repos\\memoryinspector\\tests\\memoryinspector.core.tests\\memoryinspector.core.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{7861B2FB-2707-731B-5209-6222D388FA7A}|tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj|solutionrelative:tests\\memoryinspector.core.tests\\memoryinspector.core.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7861B2FB-2707-731B-5209-6222D388FA7A}|tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj|c:\\users\\\u5433\u67CF\u9038(bobwu)twtai\\source\\repos\\memoryinspector\\tests\\memoryinspector.core.tests\\coretestsassemblymarker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7861B2FB-2707-731B-5209-6222D388FA7A}|tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj|solutionrelative:tests\\memoryinspector.core.tests\\coretestsassemblymarker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CDD79B0-5830-80E9-50D9-C847F2ACE5C5}|src\\MemoryInspector.Wpf\\MemoryInspector.Wpf.csproj|c:\\users\\\u5433\u67CF\u9038(bobwu)twtai\\source\\repos\\memoryinspector\\src\\memoryinspector.wpf\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{0CDD79B0-5830-80E9-50D9-C847F2ACE5C5}|src\\MemoryInspector.Wpf\\MemoryInspector.Wpf.csproj|solutionrelative:src\\memoryinspector.wpf\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -18,6 +31,44 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MemoryInspector.Core.Tests",
+              "DocumentMoniker": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj",
+              "RelativeDocumentMoniker": "tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj",
+              "ToolTip": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj",
+              "RelativeToolTip": "tests\\MemoryInspector.Core.Tests\\MemoryInspector.Core.Tests.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-30T10:49:57.673Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CoreTestsAssemblyMarker.cs",
+              "DocumentMoniker": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\tests\\MemoryInspector.Core.Tests\\CoreTestsAssemblyMarker.cs",
+              "RelativeDocumentMoniker": "tests\\MemoryInspector.Core.Tests\\CoreTestsAssemblyMarker.cs",
+              "ToolTip": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\tests\\MemoryInspector.Core.Tests\\CoreTestsAssemblyMarker.cs",
+              "RelativeToolTip": "tests\\MemoryInspector.Core.Tests\\CoreTestsAssemblyMarker.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-30T10:42:08.455Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\src\\MemoryInspector.Wpf\\App.xaml",
+              "RelativeDocumentMoniker": "src\\MemoryInspector.Wpf\\App.xaml",
+              "ToolTip": "C:\\Users\\\u5433\u67CF\u9038(BobWu)TWTAI\\source\\repos\\MemoryInspector\\src\\MemoryInspector.Wpf\\App.xaml",
+              "RelativeToolTip": "src\\MemoryInspector.Wpf\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-07-30T09:52:39.15Z",
+              "EditorCaption": ""
             }
           ]
         }

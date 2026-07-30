@@ -6,7 +6,7 @@ MemoryInspector is an x64 Windows memory-analysis platform built with **WPF, .NE
 
 ## Documentation version
 
-The current development pack follows **Master Specification v4** and contains **Phase 00–33**.
+The current development pack follows **Master Specification v4** and contains **Phase 00–34**.
 
 - Phase 00–23 retain their existing numbers.
 - Memory Editor is split into Phase 24 Foundation, Phase 25 Windows Writer, and Phase 26 WPF UI.
@@ -31,10 +31,10 @@ Related documents:
 
 | Item | Status |
 |---|---|
-| Completed | Phase 00–33 |
+| Completed | Phase 00–34 |
 | Current release | v1.0.0 `win-x64` self-contained |
 | Solution build | Passed, 0 warnings and 0 errors |
-| Automated tests | 402 passed, 0 failed, 0 skipped |
+| Automated tests | 408 passed, 0 failed, 0 skipped |
 | Release smoke tests | WPF and Test Target passed |
 
 See [DevelopmentProgress.md](docs/DevelopmentProgress.md) for the latest verified status.
@@ -92,9 +92,11 @@ Phase 30 adds a read-only Hex Viewer that opens directly from a Memory Region or
 
 Phase 31 adds Snapshot Compare for selecting two nodes from the current Scan Tree and classifying Added, Removed, Changed, and Unchanged addresses, record-count difference, and storage-size difference. The Application service performs a two-way streaming merge over address-sorted snapshots, retaining only two 4,096-record storage pages and the current 500-row view instead of loading both snapshots into RAM. The WPF tab provides progress, summary metrics, a virtualized paged difference view, and export. The Windows exporter consumes the same comparison stream to write CSV incrementally and atomically replaces the destination only after success, preserving an existing export on failure.
 
-Phase 32 adds a repeatable Release validation workflow covering process termination during a scan, access denial, one million candidates, multiple branches and repeated Undo/Branch operations, corrupt snapshots and history, disk-full error mapping, memory-budget enforcement, long-running Watch refresh, rapid UI paging cancellation, and the Memory Editor feature flag. Performance tests record UI orchestration latency, RAM use, snapshot read/write throughput, filtering, temporary cleanup, and live-read handle counts. All 402 tests currently pass with no known handle or stream leaks.
+Phase 32 adds a repeatable Release validation workflow covering process termination during a scan, access denial, one million candidates, multiple branches and repeated Undo/Branch operations, corrupt snapshots and history, disk-full error mapping, memory-budget enforcement, long-running Watch refresh, rapid UI paging cancellation, and the Memory Editor feature flag. Performance tests record UI orchestration latency, RAM use, snapshot read/write throughput, filtering, temporary cleanup, and live-read handle counts. All 402 tests in that phase passed with no known handle or stream leaks.
 
 Phase 33 completes the v1.0.0 `win-x64` self-contained portable release. The publishing script runs all Release tests, publishes the application, Sample Plugin, and controlled Test Target, separates PDBs into a symbols ZIP, generates a per-file `release-manifest.json` and SHA-256 sidecars, rejects test/build artifacts from the package, and launches the packaged WPF application and Test Target as smoke tests. Architecture, user, scanner, Filter Pipeline, Scan Tree, temporary-storage, plugin, troubleshooting, security/privacy, changelog, and license documentation are included.
+
+Phase 34 adds the Process Memory Scanner Workbench to the current source. The Scan tab provides Exact/Unknown First Scan, unknown-capture estimation, Next Scan, progress, cancellation, Pending Keep/Discard, and Results navigation. The Application workflow preserves the target process's actual matched bytes and rolls back failures across Session validation, snapshot creation, and Filter Pipeline activation. The existing v1.0.0 ZIP predates this phase; build the current source to use this UI.
 
 ## Solution structure
 

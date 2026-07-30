@@ -104,15 +104,24 @@ internal static class CompositionRoot
         services.AddSingleton<IValueMatcher, DefaultValueMatcher>();
         services.AddSingleton<IFirstScanService, ExactValueFirstScanService>();
         services.AddSingleton<
+            IExactInitialSnapshotService,
+            ExactInitialSnapshotService>();
+        services.AddSingleton<
             IUnknownInitialScanService,
             UnknownInitialScanService>();
         services.AddSingleton<INextScanService, NextScanService>();
+        services.AddSingleton<
+            ISnapshotNodeIdAllocator,
+            SnapshotNodeIdAllocator>();
         services.AddSingleton<
             IDurationFilterService,
             DurationFilterService>();
         services.AddSingleton<
             IFilterPipelineService,
             FilterPipelineService>();
+        services.AddSingleton<
+            IScanWorkflowService,
+            ScanWorkflowService>();
         services.AddSingleton<
             IScanHistoryStore,
             JsonScanHistoryStore>();
@@ -189,6 +198,7 @@ internal static class CompositionRoot
             WpfSnapshotCompareFileDialogService>();
         services.AddSingleton<ProcessExplorerViewModel>();
         services.AddSingleton<MemoryRegionViewerViewModel>();
+        services.AddSingleton<ScanWorkspaceViewModel>();
         services.AddSingleton<ProcessDetailsViewerViewModel>();
         services.AddSingleton<HexViewerViewModel>();
         services.AddSingleton<SnapshotCompareViewModel>();

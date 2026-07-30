@@ -2,10 +2,31 @@
 
 ## 文件狀態
 
-- 狀態：Planned / 尚未實作
-- 目的：提供後續 Agent 可直接執行的實作規格
+- 狀態：Completed / Phase 34 MVP 已實作
+- 完成日期：2026-07-30
+- 目的：提供可操作的單一 Process 記憶體掃描工作台
 - 目標平台：x64 Windows、WPF、.NET 10、MVVM
 - 主要相依階段：Phase 06～23、Phase 32、Phase 33
+
+## 實作結果
+
+- 新增 `ExactInitialSnapshotService`，Exact First Scan 命中時直接串流保存目標 Process 的實際 bytes，可正確支援 Float／Double tolerance 後續比較。
+- 新增共用 Snapshot Node ID 配置器及 `ScanWorkflowService`，負責 First Scan、Snapshot、Filter Pipeline、失敗 rollback、Next Scan、Keep 與 Discard。
+- 新增 `ScanWorkspaceViewModel` 與 WPF **Scan** 分頁，提供 Exact／Unknown First Scan、Unknown 容量估算、Next Scan、進度、取消、Pending 摘要、Keep／Discard、New Scan 與 Results 導覽。
+- Scan 工作區只接受目前已連線且身分仍有效的單一 Monitoring Session；Session 失效時會取消目前操作並清除工作狀態。
+- First Scan 完成後會將 Snapshot 載入 Results；Next Scan 先產生 Pending，只有 Keep 才成為新的 Active Snapshot。
+- 主視窗分頁導覽已改用 `WorkspaceTab` enum，插入 Scan 分頁後 Hex Viewer、Memory Editor 等既有入口不依賴易錯的硬編碼索引。
+
+## 驗證結果
+
+- Release Solution build：0 warnings、0 errors。
+- Core Tests：126 passed。
+- Windows Tests：107 passed。
+- Integration Tests：175 passed。
+- 合計：408 passed、0 failed、0 skipped。
+- WPF Release startup smoke test 通過。
+- 新增測試確認 Float tolerance 命中時 Snapshot 保存 actual bytes、Node ID 連續配置不碰撞，以及 First → Next Pending → Keep 的協調流程。
+- 下方 Test Target 全 UI click-through 保留為發行前手動驗收腳本；本次自動化未宣稱取代該手動流程。
 
 ## 使用者目標
 

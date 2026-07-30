@@ -22,6 +22,7 @@ On first launch the application creates `%LOCALAPPDATA%\MemoryInspector` and def
 
 - Processes
 - Memory Regions
+- Scan
 - Results
 - Watch
 - Saved Addresses
@@ -64,7 +65,17 @@ The scan engine supports exact-value first scans, unknown-initial snapshots, nex
 - [Filter Pipeline Guide](FilterPipelineGuide.md)
 - [Scan Tree Guide](ScanTreeGuide.md)
 
-The stock v1.0.0 WPF shell exposes result, watch, compare, and temporary-data consumers, while scan initiation remains an Application service/host integration surface rather than a dedicated scan-command panel. Integrators can drive the scan services through the composition boundary; future shells may surface these commands directly.
+The current source build provides a dedicated **Scan** tab. The published v1.0.0 ZIP predates Phase 34; build the current source to use this workbench.
+
+1. Select a Process and start Monitoring.
+2. Open **Scan**, select Exact Value or Unknown Initial, then choose the value type and alignment.
+3. For Exact Value, enter the search value. For Unknown Initial, select **Estimate** and review the candidate/disk estimate.
+4. Select **First Scan** and monitor the byte/candidate progress. You may cancel without replacing the active result.
+5. After changing the target, choose a comparison and select **Next Scan**.
+6. Review the Pending summary, then **Keep** or **Discard** it.
+7. Select **View Results** to inspect the active snapshot and send useful addresses to Watch, Saved Addresses, Hex Viewer, or the optional Memory Editor.
+
+Only one connected Process owns the active scan workflow. Stopping Monitoring, target exit, or identity mismatch cancels the operation and prevents a stale snapshot from being committed.
 
 ## Results, Watch, and Saved Addresses
 

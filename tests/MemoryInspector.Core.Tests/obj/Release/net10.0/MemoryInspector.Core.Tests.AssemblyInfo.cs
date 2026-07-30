@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright © 2026 MemoryInspector Contributors")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("x64 Windows memory inspection and analysis platform.")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a5511c8b1fbf84f080cbec84389bf39620352df")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2349be1ec91b3b224e7035d32254392adef1cc6e")]
 [assembly: System.Reflection.AssemblyProductAttribute("MemoryInspector")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MemoryInspector.Core.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

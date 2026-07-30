@@ -81,6 +81,9 @@ public partial class App : System.Windows.Application
             .GetRequiredService<ProcessExplorerViewModel>()
             .InitializeAsync(settingsResult.Value);
         await _serviceProvider
+            .GetRequiredService<ScanWorkspaceViewModel>()
+            .InitializeAsync();
+        await _serviceProvider
             .GetRequiredService<ResultGridViewModel>()
             .InitializeAsync(settingsResult.Value);
         _serviceProvider

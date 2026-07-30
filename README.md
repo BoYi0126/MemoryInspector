@@ -6,7 +6,7 @@ MemoryInspector 是以 **WPF、.NET 10 與 MVVM** 建立的 x64 Windows 記憶�
 
 ## 文件版本
 
-目前 Phase 文件採用 **Master Specification v4**，共包含 **Phase 00–33**。
+目前 Phase 文件採用 **Master Specification v4**，共包含 **Phase 00–34**。
 
 - Phase 00–23 維持原編號。
 - Memory Editor 已拆分為 Phase 24 Foundation、Phase 25 Windows Writer、Phase 26 WPF UI。
@@ -31,10 +31,10 @@ MemoryInspector 是以 **WPF、.NET 10 與 MVVM** 建立的 x64 Windows 記憶�
 
 | 項目 | 狀態 |
 |---|---|
-| 已完成 | Phase 00–33 |
+| 已完成 | Phase 00–34 |
 | 目前版本 | v1.0.0 `win-x64` self-contained |
 | Solution build | 通過，0 warnings、0 errors |
-| Automated tests | 402 passed、0 failed、0 skipped |
+| Automated tests | 408 passed、0 failed、0 skipped |
 | Release smoke tests | WPF 與 Test Target 通過 |
 
 最新結果請以 [DevelopmentProgress.md](docs/DevelopmentProgress.md) 為準。
@@ -92,9 +92,11 @@ Phase 30 新增唯讀 Hex Viewer，可從 Memory Region 或 Scan Result 直接�
 
 Phase 31 新增 Snapshot Compare，可從目前 Scan Tree 選擇左右節點並比較 Added、Removed、Changed、Unchanged、record count difference 與 storage size difference。Application service 對兩份 address-sorted snapshot 執行雙路 streaming merge，RAM 僅保留兩個 4,096-record storage pages 與目前 500-row view；不會同時載入完整 snapshots。WPF 分頁提供進度、summary、虛擬化差異列表與 paging。Windows exporter 使用相同比較 stream 逐列建立 CSV，成功後才原子替換目標檔，失敗時保留既有 export。
 
-Phase 32 建立可重複執行的 Release 驗證流程，涵蓋程序於掃描中結束、Access Denied、百萬筆 Candidate、多分支與連續 Undo／Branch、Snapshot／History 損壞、磁碟空間不足錯誤映射、Memory budget、長時間 Watch、UI 快速切頁取消，以及 Memory Editor feature flag。效能測試記錄 UI orchestration latency、RAM、Snapshot 讀寫、Filter、Temp cleanup 與 live-read Handle 數；目前 402 個測試全部通過，未發現已知 Handle／Stream 洩漏。
+Phase 32 建立可重複執行的 Release 驗證流程，涵蓋程序於掃描中結束、Access Denied、百萬筆 Candidate、多分支與連續 Undo／Branch、Snapshot／History 損壞、磁碟空間不足錯誤映射、Memory budget、長時間 Watch、UI 快速切頁取消，以及 Memory Editor feature flag。效能測試記錄 UI orchestration latency、RAM、Snapshot 讀寫、Filter、Temp cleanup 與 live-read Handle 數；該階段的 402 個測試全部通過，未發現已知 Handle／Stream 洩漏。
 
 Phase 33 完成 v1.0.0 `win-x64` self-contained portable release。發佈腳本會先執行全部 Release tests，再建立主程式、Sample Plugin 與受控 Test Target，分離 PDB 至 symbols ZIP，產生逐檔 `release-manifest.json` 與 SHA-256 sidecar，拒絕測試暫存／build intermediate 進入套件，並實際啟動封裝後的 WPF 與 Test Target。Architecture、User、Scanner、Filter Pipeline、Scan Tree、Temp Storage、Plugin、Troubleshooting、Security／Privacy、Changelog 與 License 文件均已納入。
+
+Phase 34 在目前原始碼新增 Process Memory Scanner Workbench。Scan 分頁提供 Exact／Unknown First Scan、Unknown 容量估算、Next Scan、進度、取消、Pending Keep／Discard 與 Results 導覽；Application workflow 會保存目標 Process 的實際命中 bytes，並在 Session 驗證、Snapshot 與 Filter Pipeline 間提供失敗 rollback。既有 v1.0.0 ZIP 早於本階段，需由目前原始碼重新建置才能使用此 UI。
 
 ## Solution 結構
 

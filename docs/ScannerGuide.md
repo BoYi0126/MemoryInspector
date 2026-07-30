@@ -4,7 +4,7 @@
 
 The scanner operates only against an active, identity-validated Monitoring Session. It reads committed, readable regions through the Memory Reader and writes candidate data to bounded memory or versioned snapshots. It does not change page protection or write target memory.
 
-In v1.0.0 the stock WPF shell does not provide a dedicated scan-command panel; these workflows are Application service surfaces for host or plugin integration. Result paging, Watch, Snapshot Compare, and temporary management are available in the shell.
+The current source build includes a dedicated **Scan** workbench. The published v1.0.0 package predates Phase 34, so rebuild the current source when evaluating this UI. Result paging, Watch, Snapshot Compare, and temporary management remain separate tabs.
 
 ## Value types
 
@@ -79,12 +79,13 @@ Cancellation removes incomplete temporary files and does not commit a pending sn
 
 ## Recommended workflow
 
-1. Start Monitoring on a known, authorized target.
-2. Narrow readable regions.
-3. Choose the correct value type and alignment.
-4. Run an exact scan when the value is known; otherwise capture an unknown baseline.
-5. Change one behavior in the target.
-6. Run a focused Next Scan.
-7. Review the pending summary, then Keep or Discard.
-8. Pin meaningful branches before temporary cleanup.
+1. In **Processes**, select **Scan Processes**, choose a known authorized target, and select **Start Monitoring**.
+2. Open **Scan** and confirm the target banner identifies the expected process.
+3. Choose the value type and alignment. For **Exact Value**, enter the value and optional floating-point tolerance. For **Unknown Initial**, select **Estimate** first and confirm the projected capture.
+4. Select **First Scan**. The progress panel reports scanned bytes and candidates; **Cancel** stops without replacing the active round.
+5. Select **View Results** to inspect the active snapshot.
+6. Change one behavior in the target, return to **Scan**, select the Next Scan comparison and value when required, then select **Next Scan**.
+7. Review the Pending before/after/removed summary. Select **Keep** to promote it or **Discard** to retain the previous active snapshot.
+8. Repeat the focused Next Scan as needed, then add useful candidates to Watch or Saved Addresses.
 
+**New Scan** resets the workbench for the connected target after confirmation. Old temporary snapshots remain governed by the Temporary Manager; the command does not silently delete scan data.

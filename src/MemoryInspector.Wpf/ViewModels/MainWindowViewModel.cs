@@ -9,6 +9,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(
         ProcessExplorerViewModel processExplorer,
         MemoryRegionViewerViewModel memoryRegions,
+        ScanWorkspaceViewModel scanner,
         ProcessDetailsViewerViewModel processDetails,
         HexViewerViewModel hexViewer,
         SnapshotCompareViewModel snapshotCompare,
@@ -23,6 +24,8 @@ public sealed class MainWindowViewModel : ObservableObject
             throw new ArgumentNullException(nameof(processExplorer));
         MemoryRegions = memoryRegions ??
             throw new ArgumentNullException(nameof(memoryRegions));
+        Scanner = scanner ??
+            throw new ArgumentNullException(nameof(scanner));
         ProcessDetails = processDetails ??
             throw new ArgumentNullException(nameof(processDetails));
         HexViewer = hexViewer ??
@@ -55,11 +58,14 @@ public sealed class MainWindowViewModel : ObservableObject
         Watch.EditValueRequested += OnEditValueRequested;
         SavedAddresses.EditValueRequested += OnEditValueRequested;
         MemoryEditor.WriteCompleted += OnWriteCompleted;
+        Scanner.SnapshotReady += OnScanSnapshotReady;
     }
 
     public ProcessExplorerViewModel ProcessExplorer { get; }
 
     public MemoryRegionViewerViewModel MemoryRegions { get; }
+
+    public ScanWorkspaceViewModel Scanner { get; }
 
     public ProcessDetailsViewerViewModel ProcessDetails { get; }
 
@@ -89,7 +95,7 @@ public sealed class MainWindowViewModel : ObservableObject
         object? sender,
         MemoryEditRequestedEventArgs eventArgs)
     {
-        SelectedWorkspaceIndex = 5;
+        SelectedWorkspaceIndex = (int)WorkspaceTab.MemoryEditor;
         _ = MemoryEditor.OpenAsync(
             eventArgs.Address,
             eventArgs.ValueType,
@@ -111,7 +117,7 @@ public sealed class MainWindowViewModel : ObservableObject
         object? sender,
         HexViewerRequestedEventArgs eventArgs)
     {
-        SelectedWorkspaceIndex = 9;
+        SelectedWorkspaceIndex = (int)WorkspaceTab.HexViewer;
 
         if (eventArgs.Region is not null)
         {
@@ -122,5 +128,13 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         await HexViewer.OpenAddressAsync(eventArgs.Address);
+    }
+
+    private async void OnScanSnapshotReady(
+        object? sender,
+        ScanSnapshotReadyEventArgs eventArgs)
+    {
+        await Results.ShowSnapshotAsync(eventArgs.Snapshot);
+        SelectedWorkspaceIndex = (int)WorkspaceTab.Results;
     }
 }

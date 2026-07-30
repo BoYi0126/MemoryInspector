@@ -36,6 +36,7 @@
 | 31 - Snapshot Compare | 完成 | 2026-07-29 | 已建立雙 cursor streaming merge、Added／Removed／Changed／Unchanged summary、count／storage difference、500-row paging、Scan Tree node selection、進度、虛擬化差異列表與 atomic streaming CSV export。 |
 | 32 - Integration Testing and Performance | 完成 | 2026-07-29 | 已建立 Release 全量驗證腳本、跨模組失敗／壓力場景對照、7 個效能測試與可保存的 metrics；驗證 RAM budget、Snapshot Stream、live-read Handle、Watch、Filter、paging 與 Temp cleanup。 |
 | 33 - Release, Documentation and Packaging | 完成 | 2026-07-29 | 已建立 v1.0.0 win-x64 self-contained portable／symbols ZIP、版本 metadata、manifest、SHA-256、Sample Plugin、Test Target、WPF／Target smoke tests及完整操作／安全文件。 |
+| 34 - Process Memory Scanner Workbench | 完成 | 2026-07-30 | 已新增 Actual-value Exact Initial Snapshot、Scan Workflow orchestration 與 WPF Scan 分頁，支援 Exact／Unknown First Scan、估算、Next Scan、進度／取消、Pending Keep／Discard 及 Results 導覽。 |
 
 ## 驗證紀錄
 
@@ -73,3 +74,4 @@
 - Phase 31：Solution build 成功（0 warnings、0 errors）；3 個測試組件共 392 個測試全部通過；四種差異分類、summary／paging、layout validation、unordered snapshot detection、1,000,000-record bounded-page merge、WPF selection／navigation／export，以及 CSV atomic replace／failure preservation 均通過。
 - Phase 32：Debug 與 Release Solution build 均成功（0 warnings、0 errors）；3 個測試組件共 402 個測試全部通過，7 個 Performance 測試另行通過；涵蓋掃描中程序失效、Access Denied、百萬 Candidate、多分支與連續 Undo／Branch、Snapshot／History 損壞、disk-full error mapping、Memory budget、長時間 Watch、快速切頁取消及 Editor feature flag。Release 實測 Snapshot write／read 為 2,072,132／2,128,937 records/s、Filter 112,341 candidates/s、Watch 42,947 refreshes/s、Temp 1,000 files 清理 2,735.0 ms、live read Handle growth 0，且 Snapshot 無 Stream 鎖定殘留。
 - Phase 33：Release build 成功（0 warnings、0 errors），402 tests 全數通過；`Publish-Release.ps1` 成功建立 v1.0.0 win-x64 self-contained 主 ZIP 與 symbols ZIP，逐檔 manifest、SHA-256 sidecar、Sample Plugin 與 self-contained Test Target 齊全。封裝內容無 PDB／TestResults／bin／obj／`.tmp`／`.diag`／`.trx`；Test Target 協定與封裝後 WPF 啟動 smoke tests 通過。Smoke test 另發現並修正三類 WPF display binding 對唯讀 ViewModel 屬性的 TwoWay 啟動崩潰。
+- Phase 34：Release build 成功（0 warnings、0 errors），Core 126、Windows 107、Integration 175，合計 408 tests 全數通過；新增 Exact Initial Snapshot 串流保存 target actual bytes、Snapshot Node ID 配置、First／Next Scan workflow rollback，以及 Session-bound WPF Scan Workbench。Release WPF startup smoke 通過；完整 Test Target UI click-through 保留為發行前手動驗收腳本。

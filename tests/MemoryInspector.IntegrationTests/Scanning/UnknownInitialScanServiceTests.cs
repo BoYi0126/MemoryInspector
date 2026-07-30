@@ -3,6 +3,7 @@ using MemoryInspector.Application.Configuration;
 using MemoryInspector.Application.Memory;
 using MemoryInspector.Application.Monitoring;
 using MemoryInspector.Application.Scanning;
+using MemoryInspector.Application.Scanning.History;
 using MemoryInspector.Application.Scanning.Snapshots;
 using MemoryInspector.Common;
 using MemoryInspector.Core.Memory;
@@ -18,6 +19,165 @@ namespace MemoryInspector.IntegrationTests.Scanning;
 public sealed class UnknownInitialScanServiceTests
 {
     private const ulong BaseAddress = 0x1_000;
+
+    [TestMethod]
+    public async Task ExactInitialSnapshotStoresActualFloatBytes()
+    {
+        const float actualValue = 12.500001F;
+        var memory = new byte[sizeof(float)];
+        BinaryPrimitives.WriteInt32LittleEndian(
+            memory,
+            BitConverter.SingleToInt32Bits(actualValue));
+        var reader = BufferReader(BaseAddress, memory);
+        using var fixture = new ScanFixture(
+            [ReadableRegion(BaseAddress, (ulong)memory.Length)],
+            reader);
+        var service = new ExactInitialSnapshotService(
+            fixture.SessionService,
+            fixture.RegionService,
+            fixture.Reader,
+            new DefaultValueMatcher(),
+            fixture.Storage,
+            TimeProvider.System);
+        var searchValue = new InvariantScanValueParser()
+            .Parse("12.5", ScanValueType.Float)
+            .Value;
+        var scanRequest = ScanRequest.Create(
+            ScanValueType.Float,
+            ScanComparisonMode.ExactValue,
+            searchValue,
+            ScanAlignmentMode.Aligned,
+            floatingPointTolerance: 0.001)
+            .Value;
+
+        var result = await service.CreateSnapshotAsync(
+            new ExactInitialScanRequest(1, scanRequest));
+
+        Assert.IsTrue(
+            result.IsSuccess,
+            result.IsFailure
+                ? result.Error.ToDisplayMessage()
+                : null);
+        var page = await fixture.Storage.ReadPageAsync(
+            result.Value.Snapshot,
+            1,
+            10);
+        Assert.IsTrue(page.IsSuccess);
+        Assert.AreEqual(1, page.Value.Items.Count);
+        Assert.AreEqual(
+            BitConverter.SingleToInt32Bits(actualValue),
+            BinaryPrimitives.ReadInt32LittleEndian(
+                page.Value.Items[0].Value.Span));
+        CollectionAssert.AreNotEqual(
+            searchValue.Bytes.ToArray(),
+            page.Value.Items[0].Value.ToArray());
+    }
+
+    [TestMethod]
+    public async Task SnapshotNodeAllocatorReservesDistinctIds()
+    {
+        using var fixture = new ScanFixture(
+            [ReadableRegion(BaseAddress, 4)],
+            BufferReader(BaseAddress, new byte[4]));
+        var allocator = new SnapshotNodeIdAllocator(
+            fixture.Storage);
+        var sessionId =
+            fixture.SessionService.CurrentSession!.SessionId;
+
+        var first = await allocator.ReserveAsync(sessionId);
+        var second = await allocator.ReserveAsync(sessionId);
+
+        Assert.IsTrue(first.IsSuccess);
+        Assert.IsTrue(second.IsSuccess);
+        Assert.AreEqual(1, first.Value);
+        Assert.AreEqual(2, second.Value);
+    }
+
+    [TestMethod]
+    public async Task ScanWorkflowStartsFiltersAndKeepsChangedValue()
+    {
+        var memory = new byte[sizeof(int)];
+        BinaryPrimitives.WriteInt32LittleEndian(memory, 10);
+        using var fixture = new ScanFixture(
+            [ReadableRegion(BaseAddress, (ulong)memory.Length)],
+            BufferReader(BaseAddress, memory));
+        var matcher = new DefaultValueMatcher();
+        var exact = new ExactInitialSnapshotService(
+            fixture.SessionService,
+            fixture.RegionService,
+            fixture.Reader,
+            matcher,
+            fixture.Storage,
+            TimeProvider.System);
+        var next = new NextScanService(
+            fixture.SessionService,
+            fixture.Reader,
+            fixture.Storage,
+            matcher,
+            TimeProvider.System);
+        var duration = new DurationFilterService(
+            fixture.SessionService,
+            fixture.Reader,
+            fixture.Storage,
+            matcher,
+            TimeProvider.System);
+        var pipeline = new FilterPipelineService(
+            fixture.SessionService,
+            next,
+            duration,
+            fixture.Storage,
+            new InMemoryHistoryStore());
+        var workflow = new ScanWorkflowService(
+            fixture.SessionService,
+            exact,
+            fixture.Service,
+            pipeline,
+            new SnapshotNodeIdAllocator(fixture.Storage),
+            fixture.Storage);
+        var parser = new InvariantScanValueParser();
+        var initialRequest = ScanRequest.Create(
+            ScanValueType.Int32,
+            ScanComparisonMode.ExactValue,
+            parser.Parse("10", ScanValueType.Int32).Value,
+            ScanAlignmentMode.Aligned).Value;
+
+        var started = await workflow.StartExactAsync(initialRequest);
+
+        Assert.IsTrue(
+            started.IsSuccess,
+            started.IsFailure
+                ? started.Error.ToDisplayMessage()
+                : null);
+        Assert.AreEqual(1, started.Value.Snapshot.RecordCount);
+        Assert.AreEqual(
+            started.Value.Snapshot.NodeId,
+            started.Value.PipelineState.ActiveRound.Snapshot.NodeId);
+
+        BinaryPrimitives.WriteInt32LittleEndian(memory, 20);
+        var changedRequest = ScanRequest.Create(
+            ScanValueType.Int32,
+            ScanComparisonMode.Changed,
+            searchValue: null,
+            ScanAlignmentMode.Aligned).Value;
+        var pending = await workflow.RunNextAsync(changedRequest);
+
+        Assert.IsTrue(
+            pending.IsSuccess,
+            pending.IsFailure
+                ? pending.Error.ToDisplayMessage()
+                : null);
+        Assert.AreEqual(1, pending.Value.BeforeCount);
+        Assert.AreEqual(1, pending.Value.AfterCount);
+        Assert.IsTrue(workflow.CurrentState!.CanKeep);
+
+        var kept = await workflow.KeepAsync();
+
+        Assert.IsTrue(kept.IsSuccess);
+        Assert.IsNull(kept.Value.PendingResult);
+        Assert.AreEqual(
+            pending.Value.Round.Snapshot.NodeId,
+            kept.Value.ActiveRound.Snapshot.NodeId);
+    }
 
     [TestMethod]
     public async Task EstimateReportsAlignedCandidatesAndDiskUsage()
@@ -421,6 +581,7 @@ public sealed class UnknownInitialScanServiceTests
             };
             RegionService = new DelegateMemoryRegionService(
                 new MemoryRegionQueryResult(regions));
+            Reader = reader;
             Storage = new BinarySnapshotStorage(
                 paths,
                 TimeProvider.System);
@@ -438,6 +599,8 @@ public sealed class UnknownInitialScanServiceTests
         public StubSessionService SessionService { get; }
 
         public DelegateMemoryRegionService RegionService { get; }
+
+        public DelegateMemoryReaderService Reader { get; }
 
         public BinarySnapshotStorage Storage { get; }
 
@@ -541,12 +704,28 @@ public sealed class UnknownInitialScanServiceTests
             throw new NotSupportedException();
         }
 
-        public Task<Result<MemoryBatchReadResult>> ReadBatchAsync(
+        public async Task<Result<MemoryBatchReadResult>> ReadBatchAsync(
             IEnumerable<MemoryReadRequest> requests,
             MemoryReadOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            throw new NotSupportedException();
+            var items = new List<MemoryBatchReadItem>();
+
+            foreach (var request in requests)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                items.Add(
+                    new MemoryBatchReadItem(
+                        request,
+                        await ReadAsync(
+                            request.Address,
+                            request.Length,
+                            options,
+                            cancellationToken)));
+            }
+
+            return Result<MemoryBatchReadResult>.Success(
+                new MemoryBatchReadResult(items));
         }
     }
 
@@ -613,6 +792,32 @@ public sealed class UnknownInitialScanServiceTests
         public void Report(OperationProgress value)
         {
             Reports.Add(value);
+        }
+    }
+
+    private sealed class InMemoryHistoryStore : IScanHistoryStore
+    {
+        private ScanHistoryDocument? _document;
+
+        public Task<Result<ScanHistoryDocument>> LoadAsync(
+            Guid sessionId,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(
+                _document is null
+                    ? Result<ScanHistoryDocument>.Failure(
+                        new Error(
+                            ErrorCode.NotFound,
+                            "No scan history is stored."))
+                    : Result<ScanHistoryDocument>.Success(_document));
+        }
+
+        public Task<Result> SaveAsync(
+            ScanHistoryDocument document,
+            CancellationToken cancellationToken = default)
+        {
+            _document = document;
+            return Task.FromResult(Result.Success());
         }
     }
 }
